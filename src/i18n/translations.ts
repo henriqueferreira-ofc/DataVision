@@ -265,6 +265,6 @@ const translationsData = {
   },
 };
 
-export type TranslationData = typeof translations["en"];
-export type Language = string;
-export type TranslationKeys = TranslationData;
+export type TranslationKeys = typeof translationsData["en"];
+export type Language = "en" | "pt-BR";
+export const translations = translationsData as Record<Language, TranslationKeys>;
