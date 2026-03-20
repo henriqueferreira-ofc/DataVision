@@ -14,7 +14,87 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      analyses: {
+        Row: {
+          action_plan: Json | null
+          charts_data: Json | null
+          created_at: string
+          diagnosis: Json | null
+          file_name: string
+          file_path: string
+          file_type: string
+          id: string
+          insights: Json | null
+          kpis: Json | null
+          recommendations: Json | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          action_plan?: Json | null
+          charts_data?: Json | null
+          created_at?: string
+          diagnosis?: Json | null
+          file_name: string
+          file_path: string
+          file_type: string
+          id?: string
+          insights?: Json | null
+          kpis?: Json | null
+          recommendations?: Json | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          action_plan?: Json | null
+          charts_data?: Json | null
+          created_at?: string
+          diagnosis?: Json | null
+          file_name?: string
+          file_path?: string
+          file_type?: string
+          id?: string
+          insights?: Json | null
+          kpis?: Json | null
+          recommendations?: Json | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          full_name: string | null
+          id: string
+          language: string | null
+          plan: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          language?: string | null
+          plan?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          language?: string | null
+          plan?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
