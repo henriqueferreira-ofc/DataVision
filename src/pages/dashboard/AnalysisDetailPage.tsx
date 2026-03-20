@@ -95,52 +95,14 @@ export default function AnalysisDetailPage() {
 
   const handleExportPDF = () => {
     if (!analysis) return;
-    const d = analysis.diagnosis as any;
-    const ins = analysis.insights as any;
-    const ap = analysis.action_plan as any;
-    const recs = analysis.recommendations as any;
-    const kpis = analysis.kpis as any[];
+    exportAnalysisPdf(analysis as any, language);
+    toast({ title: language === "pt-BR" ? "PDF exportado!" : "PDF exported!" });
+  };
 
-    let content = `DATAVISION PRO - ${language === "pt-BR" ? "RELATÓRIO EXECUTIVO" : "EXECUTIVE REPORT"}\n`;
-    content += `${"=".repeat(60)}\n`;
-    content += `${language === "pt-BR" ? "Arquivo" : "File"}: ${analysis.file_name}\n`;
-    content += `${language === "pt-BR" ? "Data" : "Date"}: ${new Date(analysis.created_at).toLocaleDateString(language)}\n\n`;
-
-    if (kpis?.length) {
-      content += `--- KPIs ---\n`;
-      kpis.forEach((k: any) => { content += `• ${k.name}: ${k.value} (${k.change || ""})\n`; });
-      content += "\n";
-    }
-    if (d) {
-      content += `--- ${language === "pt-BR" ? "DIAGNÓSTICO" : "DIAGNOSIS"} ---\n${d.summary}\n\n`;
-      if (d.findings?.length) { content += `${language === "pt-BR" ? "Descobertas" : "Findings"}:\n`; d.findings.forEach((f: string) => { content += `• ${f}\n`; }); content += "\n"; }
-      if (d.bottlenecks?.length) { content += `${language === "pt-BR" ? "Gargalos" : "Bottlenecks"}:\n`; d.bottlenecks.forEach((b: string) => { content += `• ${b}\n`; }); content += "\n"; }
-    }
-    if (ins) {
-      content += `--- INSIGHTS ---\n`;
-      if (ins.opportunities?.length) { content += `${language === "pt-BR" ? "Oportunidades" : "Opportunities"}:\n`; ins.opportunities.forEach((o: string) => { content += `• ${o}\n`; }); content += "\n"; }
-      if (ins.risks?.length) { content += `${language === "pt-BR" ? "Riscos" : "Risks"}:\n`; ins.risks.forEach((r: string) => { content += `• ${r}\n`; }); content += "\n"; }
-      if (ins.patterns?.length) { content += `${language === "pt-BR" ? "Padrões" : "Patterns"}:\n`; ins.patterns.forEach((p: string) => { content += `• ${p}\n`; }); content += "\n"; }
-    }
-    if (ap) {
-      content += `--- ${language === "pt-BR" ? "PLANO DE AÇÃO" : "ACTION PLAN"} ---\n`;
-      if (ap.shortTerm?.length) { content += `${language === "pt-BR" ? "Curto Prazo" : "Short Term"}:\n`; ap.shortTerm.forEach((a: string) => { content += `• ${a}\n`; }); content += "\n"; }
-      if (ap.mediumTerm?.length) { content += `${language === "pt-BR" ? "Médio Prazo" : "Medium Term"}:\n`; ap.mediumTerm.forEach((a: string) => { content += `• ${a}\n`; }); content += "\n"; }
-      if (ap.longTerm?.length) { content += `${language === "pt-BR" ? "Longo Prazo" : "Long Term"}:\n`; ap.longTerm.forEach((a: string) => { content += `• ${a}\n`; }); content += "\n"; }
-    }
-    if (recs?.length) {
-      content += `--- ${language === "pt-BR" ? "RECOMENDAÇÕES" : "RECOMMENDATIONS"} ---\n`;
-      recs.forEach((r: string, i: number) => { content += `${i + 1}. ${r}\n`; });
-    }
-
-    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `Datavision_Report_${analysis.file_name.replace(/\.[^.]+$/, "")}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast({ title: language === "pt-BR" ? "Relatório exportado!" : "Report exported!" });
+  const handleExportPPTX = () => {
+    if (!analysis) return;
+    exportAnalysisPptx(analysis as any, language);
+    toast({ title: language === "pt-BR" ? "PowerPoint exportado!" : "PowerPoint exported!" });
   };
 
   if (isLoading) {
