@@ -10,9 +10,6 @@ import {
   Stethoscope, Lightbulb, Target, Star, BarChart3,
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from "recharts";
-import { useEffect } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-
 const CHART_COLORS = [
   "hsl(217, 91%, 60%)",
   "hsl(168, 72%, 43%)",
