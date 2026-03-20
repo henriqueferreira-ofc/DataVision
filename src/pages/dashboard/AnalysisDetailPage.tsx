@@ -8,36 +8,145 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ArrowLeft, Loader2, TrendingUp, TrendingDown, Minus,
   Stethoscope, Lightbulb, Target, Star, AlertCircle,
+  Download, FileText, Presentation,
 } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from "recharts";
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  PieChart, Pie, Cell, LineChart, Line, AreaChart, Area, Legend,
+} from "recharts";
+import { useToast } from "@/hooks/use-toast";
+
 const CHART_COLORS = [
-  "hsl(217, 91%, 60%)",
-  "hsl(168, 72%, 43%)",
-  "hsl(280, 65%, 60%)",
-  "hsl(30, 90%, 55%)",
-  "hsl(340, 75%, 55%)",
-  "hsl(190, 80%, 45%)",
+  "hsl(217, 91%, 60%)", "hsl(168, 72%, 43%)", "hsl(280, 65%, 60%)",
+  "hsl(30, 90%, 55%)", "hsl(340, 75%, 55%)", "hsl(190, 80%, 45%)",
+  "hsl(45, 85%, 50%)", "hsl(120, 55%, 45%)",
 ];
+
+function ChartCard({ chart, index }: { chart: any; index: number }) {
+  if (!chart || !chart.data || !Array.isArray(chart.data) || chart.data.length === 0) return null;
+
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm font-semibold">{chart.title || `Chart ${index + 1}`}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <ResponsiveContainer width="100%" height={280}>
+          {chart.type === "pie" ? (
+            <PieChart>
+              <Pie data={chart.data} cx="50%" cy="50%" outerRadius={90} innerRadius={40} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false}>
+                {chart.data.map((_: any, i: number) => (
+                  <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip formatter={(v: number) => v.toLocaleString()} />
+              <Legend />
+            </PieChart>
+          ) : chart.type === "line" ? (
+            <LineChart data={chart.data}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+              <YAxis tick={{ fontSize: 11 }} />
+              <Tooltip formatter={(v: number) => v.toLocaleString()} />
+              <Line type="monotone" dataKey="value" stroke={CHART_COLORS[0]} strokeWidth={2.5} dot={{ r: 4 }} />
+              {chart.data[0]?.value2 !== undefined && (
+                <Line type="monotone" dataKey="value2" stroke={CHART_COLORS[1]} strokeWidth={2} dot={{ r: 3 }} />
+              )}
+              <Legend />
+            </LineChart>
+          ) : chart.type === "area" ? (
+            <AreaChart data={chart.data}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+              <YAxis tick={{ fontSize: 11 }} />
+              <Tooltip formatter={(v: number) => v.toLocaleString()} />
+              <Area type="monotone" dataKey="value" stroke={CHART_COLORS[0]} fill={CHART_COLORS[0]} fillOpacity={0.2} strokeWidth={2} />
+              {chart.data[0]?.value2 !== undefined && (
+                <Area type="monotone" dataKey="value2" stroke={CHART_COLORS[1]} fill={CHART_COLORS[1]} fillOpacity={0.15} strokeWidth={2} />
+              )}
+              <Legend />
+            </AreaChart>
+          ) : (
+            <BarChart data={chart.data}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+              <YAxis tick={{ fontSize: 11 }} />
+              <Tooltip formatter={(v: number) => v.toLocaleString()} />
+              <Bar dataKey="value" fill={CHART_COLORS[index % CHART_COLORS.length]} radius={[4, 4, 0, 0]} />
+              {chart.data[0]?.value2 !== undefined && (
+                <Bar dataKey="value2" fill={CHART_COLORS[(index + 1) % CHART_COLORS.length]} radius={[4, 4, 0, 0]} />
+              )}
+              <Legend />
+            </BarChart>
+          )}
+        </ResponsiveContainer>
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function AnalysisDetailPage() {
   const { id } = useParams();
   const { t, language } = useLanguage();
   const { data: analysis, isLoading } = useAnalysis(id);
+  const { toast } = useToast();
+
+  const handleExportPDF = () => {
+    if (!analysis) return;
+    const d = analysis.diagnosis as any;
+    const ins = analysis.insights as any;
+    const ap = analysis.action_plan as any;
+    const recs = analysis.recommendations as any;
+    const kpis = analysis.kpis as any[];
+
+    let content = `DATAVISION PRO - ${language === "pt-BR" ? "RELATÓRIO EXECUTIVO" : "EXECUTIVE REPORT"}\n`;
+    content += `${"=".repeat(60)}\n`;
+    content += `${language === "pt-BR" ? "Arquivo" : "File"}: ${analysis.file_name}\n`;
+    content += `${language === "pt-BR" ? "Data" : "Date"}: ${new Date(analysis.created_at).toLocaleDateString(language)}\n\n`;
+
+    if (kpis?.length) {
+      content += `--- KPIs ---\n`;
+      kpis.forEach((k: any) => { content += `• ${k.name}: ${k.value} (${k.change || ""})\n`; });
+      content += "\n";
+    }
+    if (d) {
+      content += `--- ${language === "pt-BR" ? "DIAGNÓSTICO" : "DIAGNOSIS"} ---\n${d.summary}\n\n`;
+      if (d.findings?.length) { content += `${language === "pt-BR" ? "Descobertas" : "Findings"}:\n`; d.findings.forEach((f: string) => { content += `• ${f}\n`; }); content += "\n"; }
+      if (d.bottlenecks?.length) { content += `${language === "pt-BR" ? "Gargalos" : "Bottlenecks"}:\n`; d.bottlenecks.forEach((b: string) => { content += `• ${b}\n`; }); content += "\n"; }
+    }
+    if (ins) {
+      content += `--- INSIGHTS ---\n`;
+      if (ins.opportunities?.length) { content += `${language === "pt-BR" ? "Oportunidades" : "Opportunities"}:\n`; ins.opportunities.forEach((o: string) => { content += `• ${o}\n`; }); content += "\n"; }
+      if (ins.risks?.length) { content += `${language === "pt-BR" ? "Riscos" : "Risks"}:\n`; ins.risks.forEach((r: string) => { content += `• ${r}\n`; }); content += "\n"; }
+      if (ins.patterns?.length) { content += `${language === "pt-BR" ? "Padrões" : "Patterns"}:\n`; ins.patterns.forEach((p: string) => { content += `• ${p}\n`; }); content += "\n"; }
+    }
+    if (ap) {
+      content += `--- ${language === "pt-BR" ? "PLANO DE AÇÃO" : "ACTION PLAN"} ---\n`;
+      if (ap.shortTerm?.length) { content += `${language === "pt-BR" ? "Curto Prazo" : "Short Term"}:\n`; ap.shortTerm.forEach((a: string) => { content += `• ${a}\n`; }); content += "\n"; }
+      if (ap.mediumTerm?.length) { content += `${language === "pt-BR" ? "Médio Prazo" : "Medium Term"}:\n`; ap.mediumTerm.forEach((a: string) => { content += `• ${a}\n`; }); content += "\n"; }
+      if (ap.longTerm?.length) { content += `${language === "pt-BR" ? "Longo Prazo" : "Long Term"}:\n`; ap.longTerm.forEach((a: string) => { content += `• ${a}\n`; }); content += "\n"; }
+    }
+    if (recs?.length) {
+      content += `--- ${language === "pt-BR" ? "RECOMENDAÇÕES" : "RECOMMENDATIONS"} ---\n`;
+      recs.forEach((r: string, i: number) => { content += `${i + 1}. ${r}\n`; });
+    }
+
+    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `Datavision_Report_${analysis.file_name.replace(/\.[^.]+$/, "")}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: language === "pt-BR" ? "Relatório exportado!" : "Report exported!" });
+  };
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
   }
 
   if (!analysis) {
-    return (
-      <div className="py-20 text-center">
-        <p className="text-muted-foreground">{language === "pt-BR" ? "Análise não encontrada" : "Analysis not found"}</p>
-      </div>
-    );
+    return <div className="py-20 text-center"><p className="text-muted-foreground">{language === "pt-BR" ? "Análise não encontrada" : "Analysis not found"}</p></div>;
   }
 
   const isProcessing = analysis.status === "processing" || analysis.status === "pending";
@@ -46,20 +155,42 @@ export default function AnalysisDetailPage() {
   const actionPlan = analysis.action_plan as any;
   const recommendations = analysis.recommendations as any;
   const kpis = analysis.kpis as any[];
-  const chartsData = analysis.charts_data as any;
+  const chartsRaw = analysis.charts_data as any;
+
+  // Support both old format (single chart object) and new (array of charts)
+  let charts: any[] = [];
+  if (Array.isArray(chartsRaw)) {
+    charts = chartsRaw;
+  } else if (chartsRaw && chartsRaw.categories) {
+    charts = [{
+      title: "Overview",
+      type: chartsRaw.chartType || "bar",
+      data: chartsRaw.categories.map((cat: string, i: number) => ({ name: cat, value: chartsRaw.values[i] })),
+    }];
+  }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" asChild className="shrink-0">
-          <Link to="/dashboard/analyses"><ArrowLeft className="h-4 w-4" /></Link>
-        </Button>
-        <div className="min-w-0">
-          <h1 className="truncate text-2xl font-bold">{analysis.file_name}</h1>
-          <p className="text-sm text-muted-foreground">
-            {new Date(analysis.created_at).toLocaleDateString(language, { year: "numeric", month: "long", day: "numeric" })}
-          </p>
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <Button variant="ghost" size="icon" asChild className="shrink-0">
+            <Link to="/dashboard/analyses"><ArrowLeft className="h-4 w-4" /></Link>
+          </Button>
+          <div className="min-w-0">
+            <h1 className="truncate text-2xl font-bold">{analysis.file_name}</h1>
+            <p className="text-sm text-muted-foreground">
+              {new Date(analysis.created_at).toLocaleDateString(language, { year: "numeric", month: "long", day: "numeric" })}
+            </p>
+          </div>
         </div>
+        {analysis.status === "completed" && (
+          <div className="flex gap-2 shrink-0">
+            <Button variant="outline" size="sm" className="gap-1.5" onClick={handleExportPDF}>
+              <FileText className="h-3.5 w-3.5" />
+              {language === "pt-BR" ? "Exportar Relatório" : "Export Report"}
+            </Button>
+          </div>
+        )}
       </div>
 
       {isProcessing && (
@@ -83,9 +214,7 @@ export default function AnalysisDetailPage() {
             <div>
               <p className="font-medium">{language === "pt-BR" ? "Falha na análise" : "Analysis failed"}</p>
               <p className="text-sm text-muted-foreground">
-                {language === "pt-BR"
-                  ? "Houve um erro ao processar este arquivo. Tente novamente."
-                  : "There was an error processing this file. Please try again."}
+                {language === "pt-BR" ? "Houve um erro ao processar este arquivo. Tente novamente." : "There was an error processing this file. Please try again."}
               </p>
             </div>
           </CardContent>
@@ -96,15 +225,15 @@ export default function AnalysisDetailPage() {
         <>
           {/* KPIs */}
           {kpis && kpis.length > 0 && (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {kpis.map((kpi, i) => (
-                <Card key={i}>
+                <Card key={i} className="overflow-hidden">
                   <CardContent className="pt-6">
-                    <p className="text-sm text-muted-foreground">{kpi.name}</p>
-                    <div className="mt-1 flex items-baseline gap-2">
+                    <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{kpi.name}</p>
+                    <div className="mt-2 flex items-baseline gap-2">
                       <span className="text-2xl font-bold tabular-nums">{kpi.value}</span>
                       {kpi.change && (
-                        <span className={`flex items-center gap-0.5 text-xs font-medium ${kpi.trend === "up" ? "text-accent" : kpi.trend === "down" ? "text-destructive" : "text-muted-foreground"}`}>
+                        <span className={`flex items-center gap-0.5 text-xs font-medium ${kpi.trend === "up" ? "text-emerald-600" : kpi.trend === "down" ? "text-destructive" : "text-muted-foreground"}`}>
                           {kpi.trend === "up" ? <TrendingUp className="h-3 w-3" /> : kpi.trend === "down" ? <TrendingDown className="h-3 w-3" /> : <Minus className="h-3 w-3" />}
                           {kpi.change}
                         </span>
@@ -116,46 +245,16 @@ export default function AnalysisDetailPage() {
             </div>
           )}
 
-          {/* Chart */}
-          {chartsData && chartsData.categories && (
-            <Card>
-              <CardContent className="pt-6">
-                <ResponsiveContainer width="100%" height={300}>
-                  {chartsData.chartType === "pie" ? (
-                    <PieChart>
-                      <Pie
-                        data={chartsData.categories.map((cat: string, i: number) => ({ name: cat, value: chartsData.values[i] }))}
-                        cx="50%" cy="50%" outerRadius={100} dataKey="value" label
-                      >
-                        {chartsData.categories.map((_: any, i: number) => (
-                          <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip />
-                    </PieChart>
-                  ) : chartsData.chartType === "line" ? (
-                    <LineChart data={chartsData.categories.map((cat: string, i: number) => ({ name: cat, value: chartsData.values[i] }))}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                      <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                      <YAxis tick={{ fontSize: 12 }} />
-                      <Tooltip />
-                      <Line type="monotone" dataKey="value" stroke="hsl(217, 91%, 60%)" strokeWidth={2} />
-                    </LineChart>
-                  ) : (
-                    <BarChart data={chartsData.categories.map((cat: string, i: number) => ({ name: cat, value: chartsData.values[i] }))}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                      <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                      <YAxis tick={{ fontSize: 12 }} />
-                      <Tooltip />
-                      <Bar dataKey="value" fill="hsl(217, 91%, 60%)" radius={[4, 4, 0, 0]} />
-                    </BarChart>
-                  )}
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
+          {/* Multiple Charts */}
+          {charts.length > 0 && (
+            <div className={`grid gap-4 ${charts.length === 1 ? "" : "md:grid-cols-2"}`}>
+              {charts.map((chart: any, i: number) => (
+                <ChartCard key={i} chart={chart} index={i} />
+              ))}
+            </div>
           )}
 
-          {/* Tabs: Diagnosis / Insights / Action Plan / Recommendations */}
+          {/* Tabs */}
           <Tabs defaultValue="diagnosis" className="space-y-4">
             <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="diagnosis" className="gap-1.5 text-xs sm:text-sm">
@@ -215,21 +314,9 @@ export default function AnalysisDetailPage() {
             <TabsContent value="insights">
               {insights && (
                 <div className="grid gap-4 md:grid-cols-3">
-                  <InsightCard
-                    title={language === "pt-BR" ? "Oportunidades" : "Opportunities"}
-                    items={insights.opportunities || []}
-                    color="accent"
-                  />
-                  <InsightCard
-                    title={language === "pt-BR" ? "Riscos" : "Risks"}
-                    items={insights.risks || []}
-                    color="destructive"
-                  />
-                  <InsightCard
-                    title={language === "pt-BR" ? "Padrões" : "Patterns"}
-                    items={insights.patterns || []}
-                    color="primary"
-                  />
+                  <InsightCard title={language === "pt-BR" ? "Oportunidades" : "Opportunities"} items={insights.opportunities || []} colorClass="bg-emerald-500" />
+                  <InsightCard title={language === "pt-BR" ? "Riscos" : "Risks"} items={insights.risks || []} colorClass="bg-destructive" />
+                  <InsightCard title={language === "pt-BR" ? "Padrões" : "Patterns"} items={insights.patterns || []} colorClass="bg-primary" />
                 </div>
               )}
             </TabsContent>
@@ -267,7 +354,7 @@ export default function AnalysisDetailPage() {
   );
 }
 
-function InsightCard({ title, items, color }: { title: string; items: string[]; color: string }) {
+function InsightCard({ title, items, colorClass }: { title: string; items: string[]; colorClass: string }) {
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -277,7 +364,7 @@ function InsightCard({ title, items, color }: { title: string; items: string[]; 
         <ul className="space-y-2">
           {items.map((item, i) => (
             <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-              <span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-${color}`} />
+              <span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${colorClass}`} />
               {item}
             </li>
           ))}
