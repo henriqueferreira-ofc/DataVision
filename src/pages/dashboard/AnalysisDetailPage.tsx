@@ -7,12 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ArrowLeft, Loader2, TrendingUp, TrendingDown, Minus,
-  Stethoscope, Lightbulb, Target, Star, BarChart3,
+  Stethoscope, Lightbulb, Target, Star, AlertCircle,
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from "recharts";
-import { useEffect } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-
 const CHART_COLORS = [
   "hsl(217, 91%, 60%)",
   "hsl(168, 72%, 43%)",
@@ -25,17 +22,7 @@ const CHART_COLORS = [
 export default function AnalysisDetailPage() {
   const { id } = useParams();
   const { t, language } = useLanguage();
-  const { data: analysis, isLoading, refetch } = useAnalysis(id);
-  const queryClient = useQueryClient();
-
-  // Auto-refresh while processing
-  useEffect(() => {
-    if (!analysis || analysis.status === "completed" || analysis.status === "error") return;
-    const interval = setInterval(() => {
-      refetch();
-    }, 3000);
-    return () => clearInterval(interval);
-  }, [analysis?.status, refetch]);
+  const { data: analysis, isLoading } = useAnalysis(id);
 
   if (isLoading) {
     return (
@@ -83,6 +70,22 @@ export default function AnalysisDetailPage() {
               <p className="font-medium">{t.dashboard.analyzing}</p>
               <p className="text-sm text-muted-foreground">
                 {language === "pt-BR" ? "A IA está analisando seu arquivo..." : "AI is analyzing your file..."}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {analysis.status === "error" && (
+        <Card className="border-destructive/30 bg-destructive/5">
+          <CardContent className="flex items-center gap-4 py-6">
+            <AlertCircle className="h-6 w-6 text-destructive" />
+            <div>
+              <p className="font-medium">{language === "pt-BR" ? "Falha na análise" : "Analysis failed"}</p>
+              <p className="text-sm text-muted-foreground">
+                {language === "pt-BR"
+                  ? "Houve um erro ao processar este arquivo. Tente novamente."
+                  : "There was an error processing this file. Please try again."}
               </p>
             </div>
           </CardContent>

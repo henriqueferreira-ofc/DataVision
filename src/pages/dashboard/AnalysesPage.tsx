@@ -104,6 +104,14 @@ function StatusBadge({ status, language }: { status: string; language: string })
       </Badge>
     );
   }
+  if (status === "error") {
+    return (
+      <Badge variant="outline" className="gap-1 border-destructive/30 bg-destructive/10 text-destructive">
+        <Clock className="h-3 w-3" />
+        {language === "pt-BR" ? "Erro" : "Error"}
+      </Badge>
+    );
+  }
   return (
     <Badge variant="outline" className="gap-1">
       <Clock className="h-3 w-3" />

@@ -28,9 +28,14 @@ export function useAnalysis(id: string | undefined) {
         .from("analyses")
         .select("*")
         .eq("id", id!)
-        .single();
+        .limit(1)
+        .maybeSingle();
       if (error) throw error;
       return data;
+    },
+    refetchInterval: (query) => {
+      const status = (query.state.data as { status?: string } | undefined)?.status;
+      return status === "pending" || status === "processing" ? 3000 : false;
     },
   });
 }
