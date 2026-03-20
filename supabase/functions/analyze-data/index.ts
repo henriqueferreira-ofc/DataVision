@@ -4,7 +4,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 serve(async (req) => {
@@ -31,8 +31,12 @@ serve(async (req) => {
 
     const { analysisId, fileContent, fileName, language } = await req.json();
 
+    // Update status to processing
+    await supabase.from("analyses").update({ status: "processing" }).eq("id", analysisId);
+
     const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
     if (!GEMINI_API_KEY) {
+      await supabase.from("analyses").update({ status: "error" }).eq("id", analysisId);
       return new Response(JSON.stringify({ error: "Gemini API key not configured" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
@@ -44,27 +48,27 @@ Respond in ${lang}. Return ONLY valid JSON with this exact structure:
 {
   "diagnosis": {
     "summary": "Brief overview of what the data shows",
-    "findings": ["finding1", "finding2", ...],
-    "bottlenecks": ["bottleneck1", ...]
+    "findings": ["finding1", "finding2"],
+    "bottlenecks": ["bottleneck1"]
   },
   "insights": {
-    "opportunities": ["opportunity1", ...],
-    "risks": ["risk1", ...],
-    "patterns": ["pattern1", ...]
+    "opportunities": ["opportunity1"],
+    "risks": ["risk1"],
+    "patterns": ["pattern1"]
   },
   "actionPlan": {
-    "shortTerm": ["action1", ...],
-    "mediumTerm": ["action1", ...],
-    "longTerm": ["action1", ...]
+    "shortTerm": ["action1"],
+    "mediumTerm": ["action1"],
+    "longTerm": ["action1"]
   },
-  "recommendations": ["Strategic recommendation 1", ...],
+  "recommendations": ["Strategic recommendation 1"],
   "kpis": [
-    {"name": "KPI Name", "value": "value", "trend": "up|down|stable", "change": "+X%"}
+    {"name": "KPI Name", "value": "value", "trend": "up", "change": "+X%"}
   ],
   "chartsData": {
     "categories": ["cat1", "cat2"],
     "values": [10, 20],
-    "chartType": "bar|line|pie"
+    "chartType": "bar"
   }
 }
 
@@ -86,16 +90,21 @@ ${fileContent.substring(0, 15000)}`;
     const geminiData = await geminiResponse.json();
     const rawText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
-    // Extract JSON from response
     const jsonMatch = rawText.match(/\{[\s\S]*\}/);
     let analysis;
     try {
       analysis = JSON.parse(jsonMatch?.[0] || "{}");
     } catch {
-      analysis = { diagnosis: { summary: rawText, findings: [], bottlenecks: [] }, insights: { opportunities: [], risks: [], patterns: [] }, actionPlan: { shortTerm: [], mediumTerm: [], longTerm: [] }, recommendations: [rawText], kpis: [], chartsData: null };
+      analysis = {
+        diagnosis: { summary: rawText, findings: [], bottlenecks: [] },
+        insights: { opportunities: [], risks: [], patterns: [] },
+        actionPlan: { shortTerm: [], mediumTerm: [], longTerm: [] },
+        recommendations: [rawText],
+        kpis: [],
+        chartsData: null,
+      };
     }
 
-    // Update analysis in database
     await supabase.from("analyses").update({
       status: "completed",
       diagnosis: analysis.diagnosis,
@@ -110,6 +119,7 @@ ${fileContent.substring(0, 15000)}`;
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
+    console.error("Error in analyze-data:", error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

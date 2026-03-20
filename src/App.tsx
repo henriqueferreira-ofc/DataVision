@@ -12,6 +12,7 @@ import Dashboard from "./pages/Dashboard";
 import DashboardHome from "./pages/dashboard/DashboardHome";
 import UploadPage from "./pages/dashboard/UploadPage";
 import AnalysesPage from "./pages/dashboard/AnalysesPage";
+import AnalysisDetailPage from "./pages/dashboard/AnalysisDetailPage";
 import ReportsPage from "./pages/dashboard/ReportsPage";
 import SettingsPage from "./pages/dashboard/SettingsPage";
 import NotFound from "./pages/NotFound";
@@ -33,6 +34,7 @@ const App = () => (
               <Route index element={<DashboardHome />} />
               <Route path="upload" element={<UploadPage />} />
               <Route path="analyses" element={<AnalysesPage />} />
+              <Route path="analyses/:id" element={<AnalysisDetailPage />} />
               <Route path="reports" element={<ReportsPage />} />
               <Route path="settings" element={<SettingsPage />} />
             </Route>
