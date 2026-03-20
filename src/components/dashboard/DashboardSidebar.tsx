@@ -38,7 +38,7 @@ export function DashboardSidebar() {
           {!collapsed && <span className="text-lg font-bold tracking-tight">Datavision</span>}
         </div>
 
-        <SidebarGroup open={isExpanded} onOpenChange={() => {}}>
+        <SidebarGroup>
           <SidebarGroupLabel>{!collapsed ? "Menu" : ""}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>

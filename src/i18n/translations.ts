@@ -263,7 +263,8 @@ export const translations: Record<string, TranslationData> = {
       longTerm: "Longo prazo",
     },
   },
-} as const;
+};
 
-export type Language = keyof typeof translations;
-export type TranslationKeys = typeof translations["en"];
+export type TranslationData = typeof translations["en"];
+export type Language = string;
+export type TranslationKeys = TranslationData;
