@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ArrowLeft, Loader2, TrendingUp, TrendingDown, Minus,
-  Stethoscope, Lightbulb, Target, Star, BarChart3,
+  Stethoscope, Lightbulb, Target, Star, AlertCircle,
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from "recharts";
 const CHART_COLORS = [
