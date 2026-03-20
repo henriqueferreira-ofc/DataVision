@@ -44,11 +44,11 @@ serve(async (req) => {
     // Update status to processing
     await supabase.from("analyses").update({ status: "processing" }).eq("id", analysisId);
 
-    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
-    if (!GEMINI_API_KEY) {
-      logStep("ERROR: No Gemini API key");
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
+      logStep("ERROR: No LOVABLE_API_KEY");
       await supabase.from("analyses").update({ status: "error" }).eq("id", analysisId);
-      return new Response(JSON.stringify({ error: "Gemini API key not configured" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return new Response(JSON.stringify({ error: "AI API key not configured" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     const lang = language === "pt-BR" ? "Portuguese (Brazil)" : "English";
@@ -93,29 +93,36 @@ Respond in ${lang}. Return ONLY valid JSON (no markdown, no code blocks) with th
 DATA:
 ${dataContent}`;
 
-    logStep("Calling Gemini API");
-    const geminiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.7, maxOutputTokens: 8192 },
-        }),
-      }
-    );
+    logStep("Calling Lovable AI Gateway");
+    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        messages: [
+          { role: "system", content: "You are an expert business data analyst. Always respond with valid JSON only, no markdown." },
+          { role: "user", content: prompt },
+        ],
+      }),
+    });
 
-    if (!geminiResponse.ok) {
-      const errText = await geminiResponse.text();
-      logStep("Gemini API error", { status: geminiResponse.status, body: errText.substring(0, 500) });
+    if (!aiResponse.ok) {
+      const errText = await aiResponse.text();
+      logStep("AI Gateway error", { status: aiResponse.status, body: errText.substring(0, 500) });
       await supabase.from("analyses").update({ status: "error" }).eq("id", analysisId);
-      return new Response(JSON.stringify({ error: `Gemini API error: ${geminiResponse.status}` }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      const userMsg = aiResponse.status === 429 ? "Rate limit exceeded, please try again later" : aiResponse.status === 402 ? "AI credits exhausted" : `AI error: ${aiResponse.status}`;
+      return new Response(JSON.stringify({ error: userMsg }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
+
+    const aiData = await aiResponse.json();
+    const rawText = aiData.choices?.[0]?.message?.content || "";
 
     const geminiData = await geminiResponse.json();
     const rawText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || "";
-    logStep("Gemini response received", { length: rawText.length, preview: rawText.substring(0, 200) });
+    logStep("AI response received", { length: rawText.length, preview: rawText.substring(0, 200) });
 
     if (!rawText) {
       logStep("ERROR: Empty Gemini response");
