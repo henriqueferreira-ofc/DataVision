@@ -151,7 +151,11 @@ export default function AnalysisDetailPage() {
           <div className="flex gap-2 shrink-0">
             <Button variant="outline" size="sm" className="gap-1.5" onClick={handleExportPDF}>
               <FileText className="h-3.5 w-3.5" />
-              {language === "pt-BR" ? "Exportar Relatório" : "Export Report"}
+              PDF
+            </Button>
+            <Button variant="outline" size="sm" className="gap-1.5" onClick={handleExportPPTX}>
+              <Presentation className="h-3.5 w-3.5" />
+              PPTX
             </Button>
           </div>
         )}
