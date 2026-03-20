@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import * as XLSX from "xlsx";
 
 const ACCEPTED_TYPES = [
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -24,14 +25,28 @@ function getFileIcon(type: string) {
   return FileText;
 }
 
-async function readFileAsText(file: File): Promise<string> {
+async function extractFileContent(file: File): Promise<string> {
+  // CSV files
   if (file.type === "text/csv" || file.name.endsWith(".csv")) {
     return file.text();
   }
-  // For binary files, convert to base64 preview or just send metadata
+
+  // Excel files - parse with SheetJS
+  if (file.name.endsWith(".xlsx") || file.name.endsWith(".xls") || file.type.includes("spreadsheet")) {
+    const buffer = await file.arrayBuffer();
+    const workbook = XLSX.read(buffer, { type: "array" });
+    let allContent = "";
+    for (const sheetName of workbook.SheetNames) {
+      const sheet = workbook.Sheets[sheetName];
+      const csv = XLSX.utils.sheet_to_csv(sheet);
+      allContent += `=== Sheet: ${sheetName} ===\n${csv}\n\n`;
+    }
+    return allContent;
+  }
+
+  // PDF and PPTX - extract what we can from binary
   const buffer = await file.arrayBuffer();
   const bytes = new Uint8Array(buffer);
-  // Try to extract readable text from first bytes
   let text = "";
   for (let i = 0; i < Math.min(bytes.length, 15000); i++) {
     const char = bytes[i];
@@ -57,11 +72,11 @@ export default function UploadPage() {
       (f) => ACCEPTED_TYPES.includes(f.type) || f.name.endsWith(".csv")
     );
     if (valid.length === 0) {
-      toast({ variant: "destructive", title: "Error", description: "Unsupported file format" });
+      toast({ variant: "destructive", title: "Error", description: language === "pt-BR" ? "Formato de arquivo não suportado" : "Unsupported file format" });
       return;
     }
     setFiles((prev) => [...prev, ...valid]);
-  }, [toast]);
+  }, [toast, language]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -103,26 +118,37 @@ export default function UploadPage() {
           .single();
         if (insertError) throw insertError;
 
-        // 3. Read file content
-        const fileContent = await readFileAsText(file);
+        // 3. Extract file content (properly parse xlsx)
+        const fileContent = await extractFileContent(file);
+        console.log(`Extracted ${fileContent.length} chars from ${file.name}`);
 
-        // 4. Trigger AI analysis (don't await - let it process in background)
-        supabase.functions.invoke("analyze-data", {
+        // 4. Trigger AI analysis
+        const { error: fnError } = await supabase.functions.invoke("analyze-data", {
           body: {
             analysisId: analysis.id,
             fileContent,
             fileName: file.name,
             language,
           },
-        }).catch((err) => console.error("Analysis error:", err));
-
-        toast({
-          title: language === "pt-BR" ? "Arquivo enviado!" : "File uploaded!",
-          description: language === "pt-BR"
-            ? `${file.name} está sendo analisado...`
-            : `${file.name} is being analyzed...`,
         });
+
+        if (fnError) {
+          console.error("Analysis function error:", fnError);
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: language === "pt-BR" ? "Erro ao analisar arquivo" : "Error analyzing file",
+          });
+        } else {
+          toast({
+            title: language === "pt-BR" ? "Análise concluída!" : "Analysis complete!",
+            description: language === "pt-BR"
+              ? `${file.name} foi analisado com sucesso`
+              : `${file.name} was analyzed successfully`,
+          });
+        }
       } catch (err: any) {
+        console.error("Upload error:", err);
         toast({
           variant: "destructive",
           title: "Error",
@@ -158,7 +184,7 @@ export default function UploadPage() {
           const input = document.createElement("input");
           input.type = "file";
           input.multiple = true;
-          input.accept = ".xlsx,.csv,.pdf,.pptx";
+          input.accept = ".xlsx,.xls,.csv,.pdf,.pptx";
           input.onchange = (e) => {
             const el = e.target as HTMLInputElement;
             if (el.files) handleFiles(el.files);
