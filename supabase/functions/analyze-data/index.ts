@@ -108,10 +108,11 @@ REQUIRED JSON STRUCTURE:
 }
 
 IMPORTANT: 
-- Generate 4-6 different charts with DIFFERENT types (bar, pie, line, area). Use the ACTUAL data values.
+- You MUST generate exactly 4-6 charts. MANDATORY: at least 1 bar, 1 pie, 1 line, and 1 area chart. Each chart must have a DIFFERENT type.
 - KPIs should show real calculated metrics from the data with real numbers.
 - All text analysis should be detailed and actionable, not generic.
 - Each chart "data" array must have at least 3 items with real values from the dataset.
+- DO NOT return all charts as "bar". Mix the types!
 
 DATA:
 ${dataContent}`;
