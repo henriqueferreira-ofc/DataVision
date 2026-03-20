@@ -119,9 +119,6 @@ ${dataContent}`;
 
     const aiData = await aiResponse.json();
     const rawText = aiData.choices?.[0]?.message?.content || "";
-
-    const geminiData = await geminiResponse.json();
-    const rawText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || "";
     logStep("AI response received", { length: rawText.length, preview: rawText.substring(0, 200) });
 
     if (!rawText) {

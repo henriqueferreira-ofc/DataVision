@@ -22,17 +22,7 @@ const CHART_COLORS = [
 export default function AnalysisDetailPage() {
   const { id } = useParams();
   const { t, language } = useLanguage();
-  const { data: analysis, isLoading, refetch } = useAnalysis(id);
-  const queryClient = useQueryClient();
-
-  // Auto-refresh while processing
-  useEffect(() => {
-    if (!analysis || analysis.status === "completed" || analysis.status === "error") return;
-    const interval = setInterval(() => {
-      refetch();
-    }, 3000);
-    return () => clearInterval(interval);
-  }, [analysis?.status, refetch]);
+  const { data: analysis, isLoading } = useAnalysis(id);
 
   if (isLoading) {
     return (
