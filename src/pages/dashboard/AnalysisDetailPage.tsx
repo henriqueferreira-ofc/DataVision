@@ -15,6 +15,8 @@ import {
   PieChart, Pie, Cell, LineChart, Line, AreaChart, Area, Legend,
 } from "recharts";
 import { useToast } from "@/hooks/use-toast";
+import { exportAnalysisPdf } from "@/lib/exportPdf";
+import { exportAnalysisPptx } from "@/lib/exportPptx";
 
 const CHART_COLORS = [
   "hsl(217, 91%, 60%)", "hsl(168, 72%, 43%)", "hsl(280, 65%, 60%)",
