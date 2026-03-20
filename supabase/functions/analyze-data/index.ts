@@ -122,7 +122,7 @@ ${dataContent}`;
 
     const geminiData = await geminiResponse.json();
     const rawText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || "";
-    logStep("Gemini response received", { length: rawText.length, preview: rawText.substring(0, 200) });
+    logStep("AI response received", { length: rawText.length, preview: rawText.substring(0, 200) });
 
     if (!rawText) {
       logStep("ERROR: Empty Gemini response");
