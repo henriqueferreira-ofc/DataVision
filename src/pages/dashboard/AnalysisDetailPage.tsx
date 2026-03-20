@@ -76,6 +76,22 @@ export default function AnalysisDetailPage() {
         </Card>
       )}
 
+      {analysis.status === "error" && (
+        <Card className="border-destructive/30 bg-destructive/5">
+          <CardContent className="flex items-center gap-4 py-6">
+            <AlertCircle className="h-6 w-6 text-destructive" />
+            <div>
+              <p className="font-medium">{language === "pt-BR" ? "Falha na análise" : "Analysis failed"}</p>
+              <p className="text-sm text-muted-foreground">
+                {language === "pt-BR"
+                  ? "Houve um erro ao processar este arquivo. Tente novamente."
+                  : "There was an error processing this file. Please try again."}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {analysis.status === "completed" && (
         <>
           {/* KPIs */}
