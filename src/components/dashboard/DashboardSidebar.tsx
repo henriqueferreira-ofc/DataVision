@@ -1,5 +1,6 @@
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
+import { useSubscription } from "@/hooks/useSubscription";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
@@ -8,11 +9,13 @@ import {
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter, useSidebar,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { Home, Upload, BarChart3, FileText, Settings, LogOut } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Home, Upload, BarChart3, FileText, Settings, LogOut, Crown, Microscope } from "lucide-react";
 
 export function DashboardSidebar() {
   const { t } = useLanguage();
   const { signOut } = useAuth();
+  const { plan } = useSubscription();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const navigate = useNavigate();
@@ -26,8 +29,6 @@ export function DashboardSidebar() {
     { title: t.dashboard.settings, url: "/dashboard/settings", icon: Settings },
   ];
 
-  const isExpanded = items.some((i) => location.pathname === i.url);
-
   return (
     <Sidebar collapsible="icon">
       <SidebarContent>
@@ -35,7 +36,16 @@ export function DashboardSidebar() {
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary">
             <BarChart3 className="h-4 w-4 text-primary-foreground" />
           </div>
-          {!collapsed && <span className="text-lg font-bold tracking-tight">Datavision</span>}
+          {!collapsed && (
+            <div className="flex items-center gap-2">
+              <span className="text-lg font-bold tracking-tight">Datavision</span>
+              {plan !== "free" && (
+                <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                  {plan === "pro" ? "PRO" : "BASIC"}
+                </Badge>
+              )}
+            </div>
+          )}
         </div>
 
         <SidebarGroup>
