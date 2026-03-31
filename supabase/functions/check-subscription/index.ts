@@ -52,7 +52,17 @@ serve(async (req) => {
     const subscription = subscriptions.data[0];
     const productId = subscription.items.data[0].price.product;
     const priceId = subscription.items.data[0].price.id;
-    const subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
+    let subscriptionEnd: string | null = null;
+    try {
+      if (subscription.current_period_end) {
+        const d = new Date(subscription.current_period_end * 1000);
+        if (!isNaN(d.getTime())) {
+          subscriptionEnd = d.toISOString();
+        }
+      }
+    } catch (_) {
+      // ignore date parse errors
+    }
 
     // Map product IDs to plan names
     const PRO_PRODUCTS = ["prod_UBmiH7QE3gQkMV", "prod_UBmk2vWMVHeWfa"];
