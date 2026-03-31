@@ -61,14 +61,24 @@ export default function DeepAnalysisPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" asChild><Link to={`/dashboard/analyses/${id}`}><ArrowLeft className="h-4 w-4" /></Link></Button>
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold">{pt ? "Análise Profunda" : "Deep Analysis"}</h1>
-            <Badge className="bg-yellow-500/10 text-yellow-600 border-yellow-500/30"><Crown className="h-3 w-3 mr-1" />PRO</Badge>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" asChild><Link to={`/dashboard/analyses/${id}`}><ArrowLeft className="h-4 w-4" /></Link></Button>
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-bold">{pt ? "Análise Profunda" : "Deep Analysis"}</h1>
+              <Badge className="bg-yellow-500/10 text-yellow-600 border-yellow-500/30"><Crown className="h-3 w-3 mr-1" />PRO</Badge>
+            </div>
+            <p className="text-sm text-muted-foreground">{analysis.file_name}</p>
           </div>
-          <p className="text-sm text-muted-foreground">{analysis.file_name}</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" className="gap-2" onClick={() => exportAnalysisPdf(analysis as any, language)}>
+            <FileText className="h-4 w-4" /> PDF
+          </Button>
+          <Button variant="outline" size="sm" className="gap-2" onClick={() => exportAnalysisPptx(analysis as any, language)}>
+            <Presentation className="h-4 w-4" /> PPTX
+          </Button>
         </div>
       </div>
 
