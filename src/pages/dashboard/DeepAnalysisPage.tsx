@@ -6,8 +6,10 @@ import { UpgradeModal } from "@/components/UpgradeModal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { exportAnalysisPdf } from "@/lib/exportPdf";
+import { exportAnalysisPptx } from "@/lib/exportPptx";
 import {
-  ArrowLeft, Loader2, TrendingUp, TrendingDown, Minus, Crown, Lock,
+  ArrowLeft, Loader2, TrendingUp, TrendingDown, Minus, Crown, Lock, FileText, Presentation,
 } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
