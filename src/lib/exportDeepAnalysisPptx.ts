@@ -165,7 +165,7 @@ export function exportDeepAnalysisPptx(analysis: AnalysisData, language: string)
       });
     } else {
       // Bar chart
-      s.addChart(pptx.charts.BAR, chartData, {
+      s.addChart(pptx.ChartType.bar, chartData, {
         ...commonOpts,
         barDir: "col",
         barGapWidthPct: 80,
