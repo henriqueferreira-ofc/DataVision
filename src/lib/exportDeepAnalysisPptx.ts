@@ -148,7 +148,7 @@ export function exportDeepAnalysisPptx(analysis: AnalysisData, language: string)
         dataLabelFontSize: 10,
       });
     } else if (chartType === "line") {
-      s.addChart(pptx.charts.LINE, chartData, {
+      s.addChart(pptx.ChartType.line, chartData, {
         ...commonOpts,
         lineSize: 2.5,
         lineDataSymbolSize: 6,
