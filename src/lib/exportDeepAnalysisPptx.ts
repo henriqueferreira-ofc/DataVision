@@ -157,7 +157,7 @@ export function exportDeepAnalysisPptx(analysis: AnalysisData, language: string)
         valGridLine: { style: "dash", size: 0.5, color: "E2E8F0" },
       });
     } else if (chartType === "area") {
-      s.addChart(pptx.charts.AREA, chartData, {
+      s.addChart(pptx.ChartType.area, chartData, {
         ...commonOpts,
         opacity: 30,
         catGridLine: { style: "dash", size: 0.5, color: "E2E8F0" },
