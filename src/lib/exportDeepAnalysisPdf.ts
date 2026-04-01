@@ -12,6 +12,209 @@ interface AnalysisData {
   charts_data: any;
 }
 
+const CHART_COLORS = [
+  [59, 130, 246],   // blue
+  [16, 185, 129],   // green
+  [139, 92, 246],   // purple
+  [245, 158, 11],   // yellow
+  [220, 38, 38],    // red
+  [6, 182, 212],    // cyan
+  [249, 115, 22],   // orange
+  [99, 102, 241],   // indigo
+];
+
+function drawBarChart(doc: jsPDF, data: any[], x: number, y: number, w: number, h: number) {
+  const maxVal = Math.max(...data.map(d => Math.max(Number(d.value) || 0, Number(d.value2) || 0)), 1);
+  const hasValue2 = data[0]?.value2 !== undefined;
+  const barAreaW = w - 10;
+  const barAreaH = h - 15;
+  const barGroupW = barAreaW / data.length;
+  const barW = hasValue2 ? barGroupW * 0.35 : barGroupW * 0.6;
+
+  // Y-axis line
+  doc.setDrawColor(200, 200, 200);
+  doc.setLineWidth(0.3);
+  doc.line(x + 8, y, x + 8, y + barAreaH);
+  doc.line(x + 8, y + barAreaH, x + w, y + barAreaH);
+
+  // Grid lines
+  for (let i = 0; i <= 4; i++) {
+    const gy = y + barAreaH - (barAreaH * i / 4);
+    doc.setDrawColor(230, 230, 230);
+    doc.line(x + 8, gy, x + w, gy);
+    doc.setFontSize(6);
+    doc.setTextColor(148, 163, 184);
+    doc.text(String(Math.round(maxVal * i / 4)), x, gy + 1.5);
+  }
+
+  data.forEach((d, i) => {
+    const bx = x + 10 + i * barGroupW + (barGroupW - (hasValue2 ? barW * 2 + 1 : barW)) / 2;
+    const val = Number(d.value) || 0;
+    const barH = (val / maxVal) * barAreaH;
+    const color = CHART_COLORS[i % CHART_COLORS.length];
+    doc.setFillColor(color[0], color[1], color[2]);
+    doc.roundedRect(bx, y + barAreaH - barH, barW, barH, 0.5, 0.5, "F");
+
+    if (hasValue2) {
+      const val2 = Number(d.value2) || 0;
+      const barH2 = (val2 / maxVal) * barAreaH;
+      const color2 = CHART_COLORS[(i + 1) % CHART_COLORS.length];
+      doc.setFillColor(color2[0], color2[1], color2[2]);
+      doc.roundedRect(bx + barW + 1, y + barAreaH - barH2, barW, barH2, 0.5, 0.5, "F");
+    }
+
+    // Label
+    doc.setFontSize(5.5);
+    doc.setTextColor(71, 85, 105);
+    const label = String(d.name || "").substring(0, 12);
+    doc.text(label, bx + barW / 2, y + barAreaH + 4, { align: "center" });
+  });
+}
+
+function drawLineChart(doc: jsPDF, data: any[], x: number, y: number, w: number, h: number) {
+  const maxVal = Math.max(...data.map(d => Math.max(Number(d.value) || 0, Number(d.value2) || 0)), 1);
+  const hasValue2 = data[0]?.value2 !== undefined;
+  const chartX = x + 10;
+  const chartW = w - 12;
+  const chartH = h - 15;
+
+  // Grid
+  doc.setDrawColor(230, 230, 230);
+  doc.setLineWidth(0.2);
+  for (let i = 0; i <= 4; i++) {
+    const gy = y + chartH - (chartH * i / 4);
+    doc.line(chartX, gy, chartX + chartW, gy);
+    doc.setFontSize(6);
+    doc.setTextColor(148, 163, 184);
+    doc.text(String(Math.round(maxVal * i / 4)), x, gy + 1.5);
+  }
+
+  // Draw lines
+  const drawLine = (values: number[], color: number[]) => {
+    doc.setDrawColor(color[0], color[1], color[2]);
+    doc.setLineWidth(0.8);
+    const points = values.map((v, i) => ({
+      px: chartX + (i / (values.length - 1)) * chartW,
+      py: y + chartH - (v / maxVal) * chartH,
+    }));
+    for (let i = 1; i < points.length; i++) {
+      doc.line(points[i - 1].px, points[i - 1].py, points[i].px, points[i].py);
+    }
+    // Dots
+    points.forEach(p => {
+      doc.setFillColor(color[0], color[1], color[2]);
+      doc.circle(p.px, p.py, 1.2, "F");
+    });
+  };
+
+  drawLine(data.map(d => Number(d.value) || 0), CHART_COLORS[0]);
+  if (hasValue2) drawLine(data.map(d => Number(d.value2) || 0), CHART_COLORS[1]);
+
+  // Labels
+  data.forEach((d, i) => {
+    const lx = chartX + (i / (data.length - 1)) * chartW;
+    doc.setFontSize(5.5);
+    doc.setTextColor(71, 85, 105);
+    doc.text(String(d.name || "").substring(0, 10), lx, y + chartH + 4, { align: "center" });
+  });
+}
+
+function drawPieChart(doc: jsPDF, data: any[], x: number, y: number, w: number, h: number) {
+  const total = data.reduce((sum, d) => sum + (Number(d.value) || 0), 0);
+  if (total === 0) return;
+  const cx = x + w * 0.35;
+  const cy = y + h * 0.45;
+  const r = Math.min(w * 0.3, h * 0.4);
+
+  let startAngle = -Math.PI / 2;
+  data.forEach((d, i) => {
+    const val = Number(d.value) || 0;
+    const sliceAngle = (val / total) * 2 * Math.PI;
+    const color = CHART_COLORS[i % CHART_COLORS.length];
+
+    // Draw pie slice using filled triangles (approximation)
+    doc.setFillColor(color[0], color[1], color[2]);
+    const steps = Math.max(Math.ceil(sliceAngle / 0.05), 2);
+    for (let s = 0; s < steps; s++) {
+      const a1 = startAngle + (sliceAngle * s / steps);
+      const a2 = startAngle + (sliceAngle * (s + 1) / steps);
+      const x1 = cx + r * Math.cos(a1);
+      const y1 = cy + r * Math.sin(a1);
+      const x2 = cx + r * Math.cos(a2);
+      const y2 = cy + r * Math.sin(a2);
+      doc.triangle(cx, cy, x1, y1, x2, y2, "F");
+    }
+    startAngle += sliceAngle;
+  });
+
+  // Legend
+  const legendX = x + w * 0.65;
+  data.forEach((d, i) => {
+    const ly = y + 5 + i * 6;
+    const color = CHART_COLORS[i % CHART_COLORS.length];
+    doc.setFillColor(color[0], color[1], color[2]);
+    doc.rect(legendX, ly - 2, 3, 3, "F");
+    doc.setFontSize(6.5);
+    doc.setTextColor(71, 85, 105);
+    const pct = total > 0 ? Math.round((Number(d.value) / total) * 100) : 0;
+    doc.text(`${d.name} (${pct}%)`, legendX + 5, ly + 0.5);
+  });
+}
+
+function drawAreaChart(doc: jsPDF, data: any[], x: number, y: number, w: number, h: number) {
+  const maxVal = Math.max(...data.map(d => Math.max(Number(d.value) || 0, Number(d.value2) || 0)), 1);
+  const hasValue2 = data[0]?.value2 !== undefined;
+  const chartX = x + 10;
+  const chartW = w - 12;
+  const chartH = h - 15;
+  const baseline = y + chartH;
+
+  // Grid
+  doc.setDrawColor(230, 230, 230);
+  doc.setLineWidth(0.2);
+  for (let i = 0; i <= 4; i++) {
+    const gy = y + chartH - (chartH * i / 4);
+    doc.line(chartX, gy, chartX + chartW, gy);
+    doc.setFontSize(6);
+    doc.setTextColor(148, 163, 184);
+    doc.text(String(Math.round(maxVal * i / 4)), x, gy + 1.5);
+  }
+
+  const drawArea = (values: number[], color: number[], opacity: number) => {
+    // Fill area with semi-transparent color
+    doc.setFillColor(color[0], color[1], color[2]);
+    doc.setGState(new (doc as any).GState({ opacity }));
+    const points = values.map((v, i) => ({
+      px: chartX + (i / (values.length - 1)) * chartW,
+      py: y + chartH - (v / maxVal) * chartH,
+    }));
+    // Draw filled area using triangles
+    for (let i = 1; i < points.length; i++) {
+      doc.triangle(points[i - 1].px, points[i - 1].py, points[i].px, points[i].py, points[i].px, baseline, "F");
+      doc.triangle(points[i - 1].px, points[i - 1].py, points[i].px, baseline, points[i - 1].px, baseline, "F");
+    }
+    doc.setGState(new (doc as any).GState({ opacity: 1 }));
+
+    // Line on top
+    doc.setDrawColor(color[0], color[1], color[2]);
+    doc.setLineWidth(0.7);
+    for (let i = 1; i < points.length; i++) {
+      doc.line(points[i - 1].px, points[i - 1].py, points[i].px, points[i].py);
+    }
+  };
+
+  drawArea(data.map(d => Number(d.value) || 0), CHART_COLORS[0], 0.2);
+  if (hasValue2) drawArea(data.map(d => Number(d.value2) || 0), CHART_COLORS[1], 0.15);
+
+  // Labels
+  data.forEach((d, i) => {
+    const lx = chartX + (i / (data.length - 1)) * chartW;
+    doc.setFontSize(5.5);
+    doc.setTextColor(71, 85, 105);
+    doc.text(String(d.name || "").substring(0, 10), lx, y + chartH + 4, { align: "center" });
+  });
+}
+
 export function exportDeepAnalysisPdf(analysis: AnalysisData, language: string) {
   const pt = language === "pt-BR";
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
@@ -101,40 +304,41 @@ export function exportDeepAnalysisPdf(analysis: AnalysisData, language: string) 
     y = (doc as any).lastAutoTable.finalY + 10;
   }
 
-  // ── Charts data as tables ──
+  // ── Charts ──
   const chartsRaw = analysis.charts_data as any;
   const charts: any[] = Array.isArray(chartsRaw) ? chartsRaw : [];
   if (charts.length) {
-    sectionTitle(pt ? "VISUALIZAÇÕES AVANÇADAS" : "ADVANCED VISUALIZATIONS");
     charts.forEach((chart: any) => {
       if (!chart.data?.length) return;
-      checkPage(30);
+      checkPage(75);
+
+      // Chart title
       doc.setTextColor(15, 23, 42);
-      doc.setFontSize(10);
+      doc.setFontSize(11);
       doc.setFont("helvetica", "bold");
-      doc.text(`${chart.title || "Chart"} (${chart.type || "bar"})`, margin, y);
+      doc.text(chart.title || "Chart", margin, y);
+      doc.setFontSize(7);
+      doc.setTextColor(148, 163, 184);
+      doc.setFont("helvetica", "italic");
+      doc.text(`(${chart.type || "bar"})`, margin + doc.getTextWidth((chart.title || "Chart") + "  "), y);
       y += 5;
 
-      const hasValue2 = chart.data[0]?.value2 !== undefined;
-      const head = hasValue2
-        ? [["Name", "Value", "Value 2"]]
-        : [["Name", "Value"]];
-      const body = chart.data.map((d: any) =>
-        hasValue2
-          ? [String(d.name || ""), String(d.value ?? ""), String(d.value2 ?? "")]
-          : [String(d.name || ""), String(d.value ?? "")]
-      );
+      // Draw chart background
+      doc.setFillColor(248, 250, 252);
+      doc.roundedRect(margin, y, contentWidth, 55, 2, 2, "F");
 
-      (doc as any).autoTable({
-        startY: y,
-        head,
-        body,
-        margin: { left: margin, right: margin },
-        styles: { fontSize: 8, cellPadding: 2.5 },
-        headStyles: { fillColor: [59, 130, 246], textColor: 255 },
-        alternateRowStyles: { fillColor: [248, 250, 252] },
-      });
-      y = (doc as any).lastAutoTable.finalY + 8;
+      const chartType = chart.type || "bar";
+      if (chartType === "pie") {
+        drawPieChart(doc, chart.data.slice(0, 8), margin + 2, y + 2, contentWidth - 4, 50);
+      } else if (chartType === "line") {
+        drawLineChart(doc, chart.data.slice(0, 12), margin + 2, y + 2, contentWidth - 4, 50);
+      } else if (chartType === "area") {
+        drawAreaChart(doc, chart.data.slice(0, 12), margin + 2, y + 2, contentWidth - 4, 50);
+      } else {
+        drawBarChart(doc, chart.data.slice(0, 10), margin + 2, y + 2, contentWidth - 4, 50);
+      }
+
+      y += 60;
     });
   }
 
