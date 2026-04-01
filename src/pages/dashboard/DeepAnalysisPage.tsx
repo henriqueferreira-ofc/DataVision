@@ -6,8 +6,8 @@ import { UpgradeModal } from "@/components/UpgradeModal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { exportAnalysisPdf } from "@/lib/exportPdf";
-import { exportAnalysisPptx } from "@/lib/exportPptx";
+import { exportDeepAnalysisPdf } from "@/lib/exportDeepAnalysisPdf";
+import { exportDeepAnalysisPptx } from "@/lib/exportDeepAnalysisPptx";
 import {
   ArrowLeft, Loader2, TrendingUp, TrendingDown, Minus, Crown, Lock, FileText, Presentation,
 } from "lucide-react";
@@ -73,10 +73,10 @@ export default function DeepAnalysisPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="gap-2" onClick={() => exportAnalysisPdf(analysis as any, language)}>
+          <Button variant="outline" size="sm" className="gap-2" onClick={() => exportDeepAnalysisPdf(analysis as any, language)}>
             <FileText className="h-4 w-4" /> PDF
           </Button>
-          <Button variant="outline" size="sm" className="gap-2" onClick={() => exportAnalysisPptx(analysis as any, language)}>
+          <Button variant="outline" size="sm" className="gap-2" onClick={() => exportDeepAnalysisPptx(analysis as any, language)}>
             <Presentation className="h-4 w-4" /> PPTX
           </Button>
         </div>
