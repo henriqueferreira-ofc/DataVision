@@ -138,7 +138,7 @@ export function exportDeepAnalysisPptx(analysis: AnalysisData, language: string)
 
     if (chartType === "pie") {
       // Pie charts use a single series with colors per slice
-      s.addChart(pptx.charts.PIE, [{ name: "Values", labels, values }], {
+      s.addChart(pptx.ChartType.pie, [{ name: "Values", labels, values }], {
         ...commonOpts,
         showPercent: true,
         showValue: false,
