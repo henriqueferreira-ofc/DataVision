@@ -25,6 +25,17 @@ const C = {
   purple: "8B5CF6",
 };
 
+const CHART_COLORS = ["3B82F6", "10B981", "8B5CF6", "F59E0B", "DC2626", "06B6D4", "F97316", "6366F1"];
+
+function mapChartType(type: string): "bar" | "line" | "area" | "pie" | "doughnut" {
+  switch (type) {
+    case "pie": return "pie";
+    case "line": return "line";
+    case "area": return "area";
+    default: return "bar";
+  }
+}
+
 export function exportDeepAnalysisPptx(analysis: AnalysisData, language: string) {
   const pt = language === "pt-BR";
   const pptx = new PptxGenJS();
@@ -86,53 +97,90 @@ export function exportDeepAnalysisPptx(analysis: AnalysisData, language: string)
     footer(s);
   }
 
-  // ── Slides 3+: Charts as data tables ──
+  // ── Chart Slides: Native pptxgenjs charts ──
   const chartsRaw = analysis.charts_data as any;
   const charts: any[] = Array.isArray(chartsRaw) ? chartsRaw : [];
-  if (charts.length) {
-    // Two charts per slide
-    for (let ci = 0; ci < charts.length; ci += 2) {
-      const s = pptx.addSlide();
-      s.background = { fill: C.white };
-      slideTitle(s, pt ? "Visualizações Avançadas" : "Advanced Visualizations");
+  charts.forEach((chart: any, ci: number) => {
+    if (!chart.data?.length) return;
+    const s = pptx.addSlide();
+    s.background = { fill: C.white };
+    slideTitle(s, chart.title || `${pt ? "Gráfico" : "Chart"} ${ci + 1}`);
 
-      const batch = charts.slice(ci, ci + 2);
-      batch.forEach((chart: any, bi: number) => {
-        const yBase = 1.2 + bi * 3.0;
-        s.addText(chart.title || `${pt ? "Gráfico" : "Chart"} ${ci + bi + 1}`, {
-          x: 0.5, y: yBase, w: 12, fontSize: 13, color: C.navy, bold: true,
-        });
-        s.addText(`(${chart.type || "bar"})`, {
-          x: 0.5, y: yBase + 0.35, w: 3, fontSize: 9, color: C.gray400, italic: true,
-        });
+    const labels = chart.data.map((d: any) => String(d.name || ""));
+    const values = chart.data.map((d: any) => Number(d.value) || 0);
+    const hasValue2 = chart.data[0]?.value2 !== undefined;
+    const values2 = hasValue2 ? chart.data.map((d: any) => Number(d.value2) || 0) : null;
 
-        if (chart.data?.length) {
-          const hasValue2 = chart.data[0]?.value2 !== undefined;
-          const header = [
-            { text: "Name", options: { fill: { color: C.navy }, color: C.white, fontSize: 9, bold: true } },
-            { text: "Value", options: { fill: { color: C.navy }, color: C.white, fontSize: 9, bold: true } },
-            ...(hasValue2 ? [{ text: "Value 2", options: { fill: { color: C.navy }, color: C.white, fontSize: 9, bold: true } }] : []),
-          ];
-          const rows = chart.data.slice(0, 8).map((d: any, ri: number) => {
-            const bg = ri % 2 === 0 ? C.white : C.gray50;
-            return [
-              { text: String(d.name || ""), options: { fill: { color: bg }, fontSize: 9, color: C.gray600 } },
-              { text: String(d.value ?? ""), options: { fill: { color: bg }, fontSize: 9, color: C.navy, bold: true } },
-              ...(hasValue2 ? [{ text: String(d.value2 ?? ""), options: { fill: { color: bg }, fontSize: 9, color: C.blue, bold: true } }] : []),
-            ];
-          });
+    const chartType = mapChartType(chart.type);
 
-          const colW = hasValue2 ? [4, 3.5, 3.5] : [5, 6];
-          s.addTable([header, ...rows], {
-            x: 0.5, y: yBase + 0.6, w: 11, colW,
-            border: { type: "solid", pt: 0.5, color: C.gray100 },
-            rowH: 0.35,
-          });
-        }
-      });
-      footer(s);
+    const chartData: any[] = [
+      { name: "Value", labels, values, color: CHART_COLORS[ci % CHART_COLORS.length] },
+    ];
+    if (values2) {
+      chartData.push({ name: "Value 2", labels, values: values2, color: CHART_COLORS[(ci + 1) % CHART_COLORS.length] });
     }
-  }
+
+    const commonOpts: any = {
+      x: 0.5,
+      y: 1.1,
+      w: 12,
+      h: 5.5,
+      showLegend: true,
+      legendPos: "b",
+      legendFontSize: 9,
+      showValue: false,
+      catAxisLabelFontSize: 9,
+      valAxisLabelFontSize: 9,
+      catAxisOrientation: "minMax",
+      valAxisOrientation: "minMax",
+      chartColors: CHART_COLORS.slice(0, Math.max(chart.data.length, 2)),
+    };
+
+    if (chartType === "pie") {
+      // Pie charts use a single series with colors per slice
+      s.addChart(pptx.charts.PIE, [{ name: "Values", labels, values }], {
+        ...commonOpts,
+        showPercent: true,
+        showValue: false,
+        showLegend: true,
+        legendPos: "r",
+        dataLabelPosition: "outEnd",
+        dataLabelFontSize: 10,
+      });
+    } else if (chartType === "line") {
+      s.addChart(pptx.charts.LINE, chartData, {
+        ...commonOpts,
+        lineSize: 2.5,
+        lineDataSymbolSize: 6,
+        showMarker: true,
+        catGridLine: { style: "dash", size: 0.5, color: "E2E8F0" },
+        valGridLine: { style: "dash", size: 0.5, color: "E2E8F0" },
+      });
+    } else if (chartType === "area") {
+      s.addChart(pptx.charts.AREA, chartData, {
+        ...commonOpts,
+        opacity: 30,
+        catGridLine: { style: "dash", size: 0.5, color: "E2E8F0" },
+        valGridLine: { style: "dash", size: 0.5, color: "E2E8F0" },
+      });
+    } else {
+      // Bar chart
+      s.addChart(pptx.charts.BAR, chartData, {
+        ...commonOpts,
+        barDir: "col",
+        barGapWidthPct: 80,
+        catGridLine: { style: "none" },
+        valGridLine: { style: "dash", size: 0.5, color: "E2E8F0" },
+      });
+    }
+
+    // Add data table below chart title
+    s.addText(`${pt ? "Tipo" : "Type"}: ${chart.type || "bar"}`, {
+      x: 0.5, y: 6.7, w: 5, fontSize: 8, color: C.gray400, italic: true,
+    });
+
+    footer(s);
+  });
 
   // ── Slide: Strategic Diagnosis ──
   const d = analysis.diagnosis as any;
@@ -211,7 +259,6 @@ export function exportDeepAnalysisPptx(analysis: AnalysisData, language: string)
     });
     s.addShape(pptx.ShapeType.rect, { x: 0.5, y: 0.85, w: 1.5, h: 0.06, fill: { color: C.blue } });
 
-    // Two columns
     const half = Math.ceil(recs.length / 2);
     const leftRecs = recs.slice(0, half);
     const rightRecs = recs.slice(half);
