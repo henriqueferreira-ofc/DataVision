@@ -58,7 +58,7 @@ export function exportDeepAnalysisPptx(analysis: AnalysisData, language: string)
     slide.addShape(pptx.ShapeType.rect, { x: 0.5, y: 0.85, w: 1.5, h: 0.06, fill: { color: C.blue } });
   };
 
-  // ── Slide 1: Cover ──
+  // ── Cover ──
   const cover = pptx.addSlide();
   cover.background = { fill: C.navy };
   cover.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: 0.15, h: 7.5, fill: { color: C.blue } });
@@ -71,7 +71,68 @@ export function exportDeepAnalysisPptx(analysis: AnalysisData, language: string)
     x: 1, y: 4.8, w: 10, fontSize: 14, color: C.gray400,
   });
 
-  // ── Slide 2: KPIs ──
+  // ── Executive Score + Data Quality ──
+  const diag = analysis.diagnosis as any;
+  const executiveScore = diag?.executiveScore;
+  const dataQuality = diag?.dataQuality;
+
+  if (executiveScore || dataQuality) {
+    const s = pptx.addSlide();
+    s.background = { fill: C.white };
+    slideTitle(s, pt ? "Visão Executiva" : "Executive Overview");
+
+    if (executiveScore) {
+      // Score display
+      const scoreColor = executiveScore.overall >= 75 ? C.green : executiveScore.overall >= 50 ? C.yellow : C.red;
+      s.addShape(pptx.ShapeType.ellipse, { x: 0.8, y: 1.3, w: 2, h: 2, fill: { color: C.gray100 } });
+      s.addText(`${executiveScore.overall}`, { x: 0.8, y: 1.5, w: 2, h: 1.2, fontSize: 44, color: scoreColor, bold: true, align: "center", valign: "middle" });
+      s.addText("/100", { x: 0.8, y: 2.5, w: 2, h: 0.4, fontSize: 14, color: C.gray400, align: "center" });
+
+      // Category bars
+      (executiveScore.categories || []).forEach((cat: any, i: number) => {
+        const cy = 1.4 + i * 0.55;
+        const pct = (cat.score / (cat.maxScore || 100));
+        const barColor = cat.score >= 75 ? C.green : cat.score >= 50 ? C.yellow : C.red;
+        s.addText(`${cat.name}: ${cat.score}`, { x: 3.2, y: cy, w: 3, fontSize: 10, color: C.gray600 });
+        s.addShape(pptx.ShapeType.rect, { x: 6, y: cy + 0.05, w: 4, h: 0.25, fill: { color: C.gray100 }, rectRadius: 0.04 });
+        s.addShape(pptx.ShapeType.rect, { x: 6, y: cy + 0.05, w: 4 * pct, h: 0.25, fill: { color: barColor }, rectRadius: 0.04 });
+      });
+
+      if (executiveScore.verdict) {
+        s.addText(executiveScore.verdict, { x: 0.5, y: 3.8, w: 12, h: 0.8, fontSize: 11, color: C.gray600, italic: true, valign: "top", wrap: true });
+      }
+    }
+
+    if (dataQuality) {
+      const baseY = executiveScore ? 4.8 : 1.2;
+      s.addText(pt ? "Qualidade dos Dados" : "Data Quality", { x: 0.5, y: baseY, w: 5, fontSize: 14, color: C.navy, bold: true });
+
+      const metrics = [
+        { label: "Score", value: dataQuality.score },
+        { label: pt ? "Completude" : "Completeness", value: dataQuality.completeness },
+        { label: pt ? "Consistência" : "Consistency", value: dataQuality.consistency },
+      ];
+      metrics.forEach((m, i) => {
+        const mx = 0.5 + i * 4;
+        const mc = m.value >= 75 ? C.green : m.value >= 50 ? C.yellow : C.red;
+        s.addShape(pptx.ShapeType.rect, { x: mx, y: baseY + 0.5, w: 3.5, h: 1, fill: { color: C.gray100 }, rectRadius: 0.08 });
+        s.addText(`${m.value}%`, { x: mx + 0.2, y: baseY + 0.55, w: 1.5, fontSize: 22, color: mc, bold: true });
+        s.addText(m.label, { x: mx + 0.2, y: baseY + 1.05, w: 3, fontSize: 9, color: C.gray400 });
+      });
+
+      if (dataQuality.observations?.length) {
+        dataQuality.observations.slice(0, 3).forEach((obs: string, i: number) => {
+          s.addText([
+            { text: "• ", options: { color: C.blue, fontSize: 9 } },
+            { text: obs, options: { color: C.gray600, fontSize: 9 } },
+          ], { x: 0.7, y: baseY + 1.7 + i * 0.35, w: 11, h: 0.3, valign: "top", wrap: true });
+        });
+      }
+    }
+    footer(s);
+  }
+
+  // ── KPIs ──
   const kpis = (analysis.kpis as any[]) || [];
   if (kpis.length) {
     const s = pptx.addSlide();
@@ -97,7 +158,7 @@ export function exportDeepAnalysisPptx(analysis: AnalysisData, language: string)
     footer(s);
   }
 
-  // ── Chart Slides: Native pptxgenjs charts ──
+  // ── Charts ──
   const chartsRaw = analysis.charts_data as any;
   const charts: any[] = Array.isArray(chartsRaw) ? chartsRaw : [];
   charts.forEach((chart: any, ci: number) => {
@@ -110,79 +171,103 @@ export function exportDeepAnalysisPptx(analysis: AnalysisData, language: string)
     const values = chart.data.map((d: any) => Number(d.value) || 0);
     const hasValue2 = chart.data[0]?.value2 !== undefined;
     const values2 = hasValue2 ? chart.data.map((d: any) => Number(d.value2) || 0) : null;
-
     const chartType = mapChartType(chart.type);
 
-    const chartData: any[] = [
-      { name: "Value", labels, values, color: CHART_COLORS[ci % CHART_COLORS.length] },
-    ];
-    if (values2) {
-      chartData.push({ name: "Value 2", labels, values: values2, color: CHART_COLORS[(ci + 1) % CHART_COLORS.length] });
-    }
+    const chartData: any[] = [{ name: "Value", labels, values, color: CHART_COLORS[ci % CHART_COLORS.length] }];
+    if (values2) chartData.push({ name: "Value 2", labels, values: values2, color: CHART_COLORS[(ci + 1) % CHART_COLORS.length] });
 
     const commonOpts: any = {
-      x: 0.5,
-      y: 1.1,
-      w: 12,
-      h: 5.5,
-      showLegend: true,
-      legendPos: "b",
-      legendFontSize: 9,
-      showValue: false,
-      catAxisLabelFontSize: 9,
-      valAxisLabelFontSize: 9,
-      catAxisOrientation: "minMax",
-      valAxisOrientation: "minMax",
+      x: 0.5, y: 1.1, w: 12, h: 5.5,
+      showLegend: true, legendPos: "b", legendFontSize: 9, showValue: false,
+      catAxisLabelFontSize: 9, valAxisLabelFontSize: 9,
       chartColors: CHART_COLORS.slice(0, Math.max(chart.data.length, 2)),
     };
 
     if (chartType === "pie") {
-      // Pie charts use a single series with colors per slice
       s.addChart(pptx.ChartType.pie, [{ name: "Values", labels, values }], {
-        ...commonOpts,
-        showPercent: true,
-        showValue: false,
-        showLegend: true,
-        legendPos: "r",
-        dataLabelPosition: "outEnd",
-        dataLabelFontSize: 10,
+        ...commonOpts, showPercent: true, showValue: false, showLegend: true, legendPos: "r",
+        dataLabelPosition: "outEnd", dataLabelFontSize: 10,
       });
     } else if (chartType === "line") {
       s.addChart(pptx.ChartType.line, chartData, {
-        ...commonOpts,
-        lineSize: 2.5,
-        lineDataSymbolSize: 6,
-        showMarker: true,
+        ...commonOpts, lineSize: 2.5, lineDataSymbolSize: 6, showMarker: true,
         catGridLine: { style: "dash", size: 0.5, color: "E2E8F0" },
         valGridLine: { style: "dash", size: 0.5, color: "E2E8F0" },
       });
     } else if (chartType === "area") {
       s.addChart(pptx.ChartType.area, chartData, {
-        ...commonOpts,
-        opacity: 30,
+        ...commonOpts, opacity: 30,
         catGridLine: { style: "dash", size: 0.5, color: "E2E8F0" },
         valGridLine: { style: "dash", size: 0.5, color: "E2E8F0" },
       });
     } else {
-      // Bar chart
       s.addChart(pptx.ChartType.bar, chartData, {
-        ...commonOpts,
-        barDir: "col",
-        barGapWidthPct: 80,
+        ...commonOpts, barDir: "col", barGapWidthPct: 80,
         catGridLine: { style: "none" },
         valGridLine: { style: "dash", size: 0.5, color: "E2E8F0" },
       });
     }
 
-    // Add data table below chart title
     s.addText(`${pt ? "Tipo" : "Type"}: ${chart.type || "bar"}`, {
       x: 0.5, y: 6.7, w: 5, fontSize: 8, color: C.gray400, italic: true,
     });
-
     footer(s);
   });
 
-  // ── Slide: Strategic Diagnosis ──
+  // ── SWOT Analysis ──
+  const swot = diag?.swot;
+  if (swot) {
+    const s = pptx.addSlide();
+    s.background = { fill: C.white };
+    slideTitle(s, pt ? "Análise SWOT" : "SWOT Analysis");
+
+    const quadrants = [
+      { title: pt ? "Forças" : "Strengths", items: swot.strengths || [], color: C.green, x: 0.5, y: 1.2 },
+      { title: pt ? "Fraquezas" : "Weaknesses", items: swot.weaknesses || [], color: C.red, x: 6.5, y: 1.2 },
+      { title: pt ? "Oportunidades" : "Opportunities", items: swot.opportunities || [], color: C.blue, x: 0.5, y: 4.2 },
+      { title: pt ? "Ameaças" : "Threats", items: swot.threats || [], color: C.yellow, x: 6.5, y: 4.2 },
+    ];
+
+    quadrants.forEach((q) => {
+      s.addShape(pptx.ShapeType.rect, { x: q.x, y: q.y, w: 5.8, h: 2.8, fill: { color: C.gray100 }, rectRadius: 0.1 });
+      s.addShape(pptx.ShapeType.rect, { x: q.x, y: q.y, w: 5.8, h: 0.06, fill: { color: q.color } });
+      s.addText(q.title, { x: q.x + 0.2, y: q.y + 0.15, w: 5.4, fontSize: 13, color: q.color, bold: true });
+      q.items.slice(0, 4).forEach((item: string, i: number) => {
+        s.addText([
+          { text: "● ", options: { color: q.color, fontSize: 9 } },
+          { text: item, options: { color: C.gray600, fontSize: 9 } },
+        ], { x: q.x + 0.3, y: q.y + 0.6 + i * 0.5, w: 5.2, h: 0.45, valign: "top", wrap: true });
+      });
+    });
+    footer(s);
+  }
+
+  // ── Correlations ──
+  const correlations = diag?.correlations || [];
+  if (correlations.length) {
+    const s = pptx.addSlide();
+    s.background = { fill: C.white };
+    slideTitle(s, pt ? "Correlações Identificadas" : "Identified Correlations");
+
+    correlations.slice(0, 5).forEach((cor: any, i: number) => {
+      const cy = 1.2 + i * 1.1;
+      s.addShape(pptx.ShapeType.rect, { x: 0.5, y: cy, w: 12, h: 0.9, fill: { color: i % 2 === 0 ? C.gray50 : C.white }, rectRadius: 0.06 });
+      const arrow = cor.relationship === "positive" ? "↗" : cor.relationship === "negative" ? "↘" : "→";
+      const relColor = cor.relationship === "positive" ? C.green : cor.relationship === "negative" ? C.red : C.gray400;
+      s.addText(cor.factor1, { x: 0.7, y: cy + 0.05, w: 2.5, fontSize: 11, color: C.navy, bold: true, valign: "middle" });
+      s.addText(arrow, { x: 3.3, y: cy + 0.05, w: 0.5, fontSize: 18, color: relColor, bold: true, align: "center", valign: "middle" });
+      s.addText(cor.factor2, { x: 3.9, y: cy + 0.05, w: 2.5, fontSize: 11, color: C.navy, bold: true, valign: "middle" });
+
+      const strengthColor = cor.strength === "strong" ? C.green : cor.strength === "moderate" ? C.yellow : C.gray400;
+      const strengthLabel = cor.strength === "strong" ? (pt ? "Forte" : "Strong") : cor.strength === "moderate" ? (pt ? "Moderada" : "Moderate") : (pt ? "Fraca" : "Weak");
+      s.addShape(pptx.ShapeType.rect, { x: 6.5, y: cy + 0.2, w: 1.2, h: 0.35, fill: { color: strengthColor }, rectRadius: 0.04 });
+      s.addText(strengthLabel, { x: 6.5, y: cy + 0.2, w: 1.2, h: 0.35, fontSize: 8, color: C.white, bold: true, align: "center", valign: "middle" });
+      s.addText(cor.description || "", { x: 7.9, y: cy + 0.05, w: 4.5, fontSize: 9, color: C.gray600, valign: "middle", wrap: true });
+    });
+    footer(s);
+  }
+
+  // ── Diagnosis ──
   const d = analysis.diagnosis as any;
   if (d) {
     const s = pptx.addSlide();
@@ -221,7 +306,7 @@ export function exportDeepAnalysisPptx(analysis: AnalysisData, language: string)
     footer(s);
   }
 
-  // ── Slide: Opportunities & Risks ──
+  // ── Opportunities & Risks ──
   const ins = analysis.insights as any;
   if (ins) {
     const s = pptx.addSlide();
@@ -249,7 +334,7 @@ export function exportDeepAnalysisPptx(analysis: AnalysisData, language: string)
     footer(s);
   }
 
-  // ── Slide: Strategic Recommendations ──
+  // ── Recommendations ──
   const recs = (analysis.recommendations as string[]) || [];
   if (recs.length) {
     const s = pptx.addSlide();
@@ -260,10 +345,7 @@ export function exportDeepAnalysisPptx(analysis: AnalysisData, language: string)
     s.addShape(pptx.ShapeType.rect, { x: 0.5, y: 0.85, w: 1.5, h: 0.06, fill: { color: C.blue } });
 
     const half = Math.ceil(recs.length / 2);
-    const leftRecs = recs.slice(0, half);
-    const rightRecs = recs.slice(half);
-
-    [leftRecs, rightRecs].forEach((col, ci) => {
+    [recs.slice(0, half), recs.slice(half)].forEach((col, ci) => {
       const xBase = ci === 0 ? 0.5 : 6.5;
       col.forEach((r: string, i: number) => {
         const idx = ci === 0 ? i : i + half;
@@ -275,7 +357,7 @@ export function exportDeepAnalysisPptx(analysis: AnalysisData, language: string)
     });
   }
 
-  // ── Slide: Strategic Action Plan ──
+  // ── Action Plan ──
   const ap = analysis.action_plan as any;
   if (ap) {
     const s = pptx.addSlide();
@@ -299,7 +381,7 @@ export function exportDeepAnalysisPptx(analysis: AnalysisData, language: string)
     footer(s);
   }
 
-  // ── Slide: Closing ──
+  // ── Closing ──
   const closing = pptx.addSlide();
   closing.background = { fill: C.navy };
   closing.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: 0.15, h: 7.5, fill: { color: C.blue } });

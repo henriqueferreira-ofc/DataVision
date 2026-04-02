@@ -6,15 +6,18 @@ import { UpgradeModal } from "@/components/UpgradeModal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { exportDeepAnalysisPdf } from "@/lib/exportDeepAnalysisPdf";
 import { exportDeepAnalysisPptx } from "@/lib/exportDeepAnalysisPptx";
 import {
   ArrowLeft, Loader2, TrendingUp, TrendingDown, Minus, Crown, Lock, FileText, Presentation,
+  Shield, Target, Zap, AlertTriangle, CheckCircle2, XCircle, ArrowUpRight, ArrowDownRight,
+  Database, Link2,
 } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, LineChart, Line, AreaChart, Area, Legend, RadarChart,
-  Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
+  PieChart, Pie, Cell, LineChart, Line, AreaChart, Area, Legend,
+  RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
 } from "recharts";
 import { useState } from "react";
 
@@ -23,6 +26,35 @@ const COLORS = [
   "hsl(30,90%,55%)", "hsl(340,75%,55%)", "hsl(190,80%,45%)",
   "hsl(45,85%,50%)", "hsl(120,55%,45%)",
 ];
+
+const SWOT_CONFIG = {
+  strengths: { icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-500/10", border: "border-emerald-500/30", fill: "bg-emerald-500" },
+  weaknesses: { icon: XCircle, color: "text-red-500", bg: "bg-red-500/10", border: "border-red-500/30", fill: "bg-red-500" },
+  opportunities: { icon: ArrowUpRight, color: "text-blue-500", bg: "bg-blue-500/10", border: "border-blue-500/30", fill: "bg-blue-500" },
+  threats: { icon: AlertTriangle, color: "text-amber-500", bg: "bg-amber-500/10", border: "border-amber-500/30", fill: "bg-amber-500" },
+};
+
+function ScoreRing({ score, size = 120 }: { score: number; size?: number }) {
+  const radius = (size - 16) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const progress = (score / 100) * circumference;
+  const color = score >= 75 ? "stroke-emerald-500" : score >= 50 ? "stroke-amber-500" : "stroke-red-500";
+
+  return (
+    <div className="relative" style={{ width: size, height: size }}>
+      <svg width={size} height={size} className="-rotate-90">
+        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="hsl(var(--border))" strokeWidth="8" />
+        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" className={color} strokeWidth="8"
+          strokeDasharray={circumference} strokeDashoffset={circumference - progress} strokeLinecap="round"
+          style={{ transition: "stroke-dashoffset 1s ease" }} />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="text-3xl font-bold tabular-nums">{score}</span>
+        <span className="text-xs text-muted-foreground">/100</span>
+      </div>
+    </div>
+  );
+}
 
 export default function DeepAnalysisPage() {
   const { id } = useParams();
@@ -39,7 +71,7 @@ export default function DeepAnalysisPage() {
           <Lock className="h-8 w-8 text-yellow-500" />
         </div>
         <h2 className="text-xl font-bold">{pt ? "Recurso Exclusivo PRO" : "PRO Exclusive Feature"}</h2>
-        <p className="text-muted-foreground max-w-md">{pt ? "A Análise Profunda oferece gráficos avançados, comparativos, tendências e recomendações estratégicas. Faça upgrade para desbloquear." : "Deep Analysis offers advanced charts, comparisons, trends and strategic recommendations. Upgrade to unlock."}</p>
+        <p className="text-muted-foreground max-w-md">{pt ? "A Análise Profunda oferece gráficos avançados, SWOT, scoring executivo, correlações e recomendações estratégicas. Faça upgrade para desbloquear." : "Deep Analysis offers advanced charts, SWOT, executive scoring, correlations and strategic recommendations. Upgrade to unlock."}</p>
         <Button onClick={() => setShowUpgrade(true)} className="gap-2">
           <Crown className="h-4 w-4" /> {pt ? "Fazer Upgrade para PRO" : "Upgrade to PRO"}
         </Button>
@@ -59,8 +91,20 @@ export default function DeepAnalysisPage() {
   const actionPlan = analysis.action_plan as any;
   const recommendations = (analysis.recommendations as string[]) || [];
 
+  // New deep fields stored inside diagnosis
+  const swot = diagnosis?.swot || null;
+  const executiveScore = diagnosis?.executiveScore || null;
+  const correlations = diagnosis?.correlations || [];
+  const dataQuality = diagnosis?.dataQuality || null;
+
+  // Radar data for executive score
+  const radarData = executiveScore?.categories?.map((c: any) => ({
+    subject: c.name, A: c.score, fullMark: c.maxScore || 100,
+  })) || [];
+
   return (
     <div className="space-y-8">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" asChild><Link to={`/dashboard/analyses/${id}`}><ArrowLeft className="h-4 w-4" /></Link></Button>
@@ -82,7 +126,81 @@ export default function DeepAnalysisPage() {
         </div>
       </div>
 
-      {/* KPIs with more detail */}
+      {/* Executive Score + Data Quality */}
+      {(executiveScore || dataQuality) && (
+        <div className="grid gap-6 md:grid-cols-2">
+          {executiveScore && (
+            <Card className="border-primary/20">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-sm">
+                  <Target className="h-4 w-4 text-primary" />
+                  {pt ? "Score Executivo" : "Executive Score"}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-6">
+                  <ScoreRing score={executiveScore.overall || 0} />
+                  <div className="flex-1 space-y-3">
+                    {executiveScore.categories?.map((cat: any, i: number) => (
+                      <div key={i}>
+                        <div className="flex items-center justify-between text-xs mb-1">
+                          <span className="font-medium">{cat.name}</span>
+                          <span className="tabular-nums text-muted-foreground">{cat.score}/{cat.maxScore || 100}</span>
+                        </div>
+                        <Progress value={(cat.score / (cat.maxScore || 100)) * 100} className="h-2" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                {executiveScore.verdict && (
+                  <p className="mt-4 text-sm text-muted-foreground border-t pt-3">{executiveScore.verdict}</p>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {dataQuality && (
+            <Card className="border-primary/20">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-sm">
+                  <Database className="h-4 w-4 text-primary" />
+                  {pt ? "Qualidade dos Dados" : "Data Quality"}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-6">
+                  <ScoreRing score={dataQuality.score || 0} size={100} />
+                  <div className="flex-1 space-y-3">
+                    {[
+                      { label: pt ? "Completude" : "Completeness", value: dataQuality.completeness },
+                      { label: pt ? "Consistência" : "Consistency", value: dataQuality.consistency },
+                    ].map((m, i) => (
+                      <div key={i}>
+                        <div className="flex items-center justify-between text-xs mb-1">
+                          <span className="font-medium">{m.label}</span>
+                          <span className="tabular-nums text-muted-foreground">{m.value}%</span>
+                        </div>
+                        <Progress value={m.value || 0} className="h-2" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                {dataQuality.observations?.length > 0 && (
+                  <ul className="mt-4 space-y-1.5 border-t pt-3">
+                    {dataQuality.observations.map((obs: string, i: number) => (
+                      <li key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
+                        <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-primary" />{obs}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
+
+      {/* KPIs */}
       {kpis.length > 0 && (
         <div>
           <h2 className="text-lg font-semibold mb-3">{pt ? "Indicadores-Chave de Performance" : "Key Performance Indicators"}</h2>
@@ -107,7 +225,7 @@ export default function DeepAnalysisPage() {
         </div>
       )}
 
-      {/* All charts in large format */}
+      {/* Charts */}
       {charts.length > 0 && (
         <div>
           <h2 className="text-lg font-semibold mb-3">{pt ? "Visualizações Avançadas" : "Advanced Visualizations"}</h2>
@@ -134,7 +252,92 @@ export default function DeepAnalysisPage() {
         </div>
       )}
 
-      {/* Comparative Analysis */}
+      {/* Executive Score Radar */}
+      {radarData.length > 0 && (
+        <div>
+          <h2 className="text-lg font-semibold mb-3">{pt ? "Radar de Performance" : "Performance Radar"}</h2>
+          <Card>
+            <CardContent className="pt-6">
+              <ResponsiveContainer width="100%" height={350}>
+                <RadarChart data={radarData}>
+                  <PolarGrid stroke="hsl(var(--border))" />
+                  <PolarAngleAxis dataKey="subject" tick={{ fontSize: 12 }} />
+                  <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fontSize: 10 }} />
+                  <Radar name="Score" dataKey="A" stroke={COLORS[0]} fill={COLORS[0]} fillOpacity={0.25} strokeWidth={2} />
+                </RadarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* SWOT Matrix */}
+      {swot && (
+        <div>
+          <h2 className="text-lg font-semibold mb-3">{pt ? "Análise SWOT" : "SWOT Analysis"}</h2>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {(Object.entries(SWOT_CONFIG) as [keyof typeof SWOT_CONFIG, typeof SWOT_CONFIG[keyof typeof SWOT_CONFIG]][]).map(([key, cfg]) => {
+              const Icon = cfg.icon;
+              const items = swot[key] || [];
+              const titles: Record<string, string> = {
+                strengths: pt ? "Forças" : "Strengths",
+                weaknesses: pt ? "Fraquezas" : "Weaknesses",
+                opportunities: pt ? "Oportunidades" : "Opportunities",
+                threats: pt ? "Ameaças" : "Threats",
+              };
+              return (
+                <Card key={key} className={cfg.border}>
+                  <CardHeader className="pb-2">
+                    <CardTitle className={`flex items-center gap-2 text-sm ${cfg.color}`}>
+                      <Icon className="h-4 w-4" /> {titles[key]}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2">
+                      {items.map((item: string, i: number) => (
+                        <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
+                          <span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${cfg.fill}`} />{item}
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Correlations */}
+      {correlations.length > 0 && (
+        <div>
+          <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
+            <Link2 className="h-5 w-5 text-primary" />
+            {pt ? "Correlações Identificadas" : "Identified Correlations"}
+          </h2>
+          <div className="grid gap-4 md:grid-cols-2">
+            {correlations.map((cor: any, i: number) => (
+              <Card key={i}>
+                <CardContent className="pt-5">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Badge variant="outline" className="text-xs">{cor.factor1}</Badge>
+                    <span className={`text-sm font-bold ${cor.relationship === "positive" ? "text-emerald-600" : cor.relationship === "negative" ? "text-destructive" : "text-muted-foreground"}`}>
+                      {cor.relationship === "positive" ? "↗" : cor.relationship === "negative" ? "↘" : "→"}
+                    </span>
+                    <Badge variant="outline" className="text-xs">{cor.factor2}</Badge>
+                    <Badge className={`ml-auto text-[10px] ${cor.strength === "strong" ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30" : cor.strength === "moderate" ? "bg-amber-500/10 text-amber-600 border-amber-500/30" : "bg-muted text-muted-foreground"}`}>
+                      {cor.strength === "strong" ? (pt ? "Forte" : "Strong") : cor.strength === "moderate" ? (pt ? "Moderada" : "Moderate") : (pt ? "Fraca" : "Weak")}
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-muted-foreground">{cor.description}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Diagnosis */}
       {diagnosis && (
         <div>
           <h2 className="text-lg font-semibold mb-3">{pt ? "Diagnóstico Estratégico" : "Strategic Diagnosis"}</h2>
@@ -177,7 +380,7 @@ export default function DeepAnalysisPage() {
         </div>
       )}
 
-      {/* Strategic Recommendations */}
+      {/* Recommendations */}
       {recommendations.length > 0 && (
         <div>
           <h2 className="text-lg font-semibold mb-3">{pt ? "Recomendações Estratégicas" : "Strategic Recommendations"}</h2>
@@ -196,7 +399,7 @@ export default function DeepAnalysisPage() {
         </div>
       )}
 
-      {/* Action Plan Timeline */}
+      {/* Action Plan */}
       {actionPlan && (
         <div>
           <h2 className="text-lg font-semibold mb-3">{pt ? "Plano de Ação Estratégico" : "Strategic Action Plan"}</h2>
