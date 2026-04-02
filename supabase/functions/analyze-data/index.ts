@@ -57,28 +57,54 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "File content is empty or too short" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const prompt = `You are an elite business analyst, data scientist, and strategic consultant. Analyze the data from "${fileName}" with deep expertise.
+    const prompt = `You are an elite business analyst, senior data scientist, and strategic management consultant with 20+ years of experience across Fortune 500 companies. Perform an exhaustive analysis of the data from "${fileName}".
 
-Respond in ${lang}. Return ONLY valid JSON (no markdown, no code blocks). Generate MULTIPLE charts showing different perspectives of the data. Include at least 4-6 KPIs.
+Respond in ${lang}. Return ONLY valid JSON (no markdown, no code blocks).
 
 REQUIRED JSON STRUCTURE:
 {
   "diagnosis": {
-    "summary": "Detailed executive summary (3-5 sentences)",
-    "findings": ["detailed finding 1", "detailed finding 2", "finding 3", "finding 4", "finding 5"],
-    "bottlenecks": ["bottleneck 1", "bottleneck 2", "bottleneck 3"]
+    "summary": "Comprehensive executive summary (5-8 sentences covering scope, methodology, key findings and strategic implications)",
+    "findings": ["detailed finding 1 with data evidence", "finding 2", "finding 3", "finding 4", "finding 5"],
+    "bottlenecks": ["bottleneck 1 with impact assessment", "bottleneck 2", "bottleneck 3"]
   },
   "insights": {
-    "opportunities": ["opportunity 1", "opportunity 2", "opportunity 3"],
-    "risks": ["risk 1", "risk 2", "risk 3"],
-    "patterns": ["pattern 1", "pattern 2", "pattern 3"]
+    "opportunities": ["opportunity 1 with estimated impact", "opportunity 2", "opportunity 3", "opportunity 4"],
+    "risks": ["risk 1 with probability and severity", "risk 2", "risk 3", "risk 4"],
+    "patterns": ["pattern 1 with statistical backing", "pattern 2", "pattern 3"]
+  },
+  "swot": {
+    "strengths": ["strength 1 derived from data", "strength 2", "strength 3"],
+    "weaknesses": ["weakness 1 derived from data", "weakness 2", "weakness 3"],
+    "opportunities": ["external opportunity 1", "external opportunity 2", "external opportunity 3"],
+    "threats": ["external threat 1", "external threat 2", "external threat 3"]
+  },
+  "executiveScore": {
+    "overall": 72,
+    "categories": [
+      {"name": "Performance", "score": 75, "maxScore": 100},
+      {"name": "Growth", "score": 68, "maxScore": 100},
+      {"name": "Efficiency", "score": 80, "maxScore": 100},
+      {"name": "Risk", "score": 65, "maxScore": 100}
+    ],
+    "verdict": "A concise 2-sentence executive verdict about overall health"
+  },
+  "correlations": [
+    {"factor1": "Variable A", "factor2": "Variable B", "relationship": "positive|negative|neutral", "strength": "strong|moderate|weak", "description": "How A influences B based on data"},
+    {"factor1": "Variable C", "factor2": "Variable D", "relationship": "negative", "strength": "moderate", "description": "Inverse relationship observed"}
+  ],
+  "dataQuality": {
+    "score": 85,
+    "completeness": 90,
+    "consistency": 80,
+    "observations": ["observation about data quality 1", "observation 2"]
   },
   "actionPlan": {
-    "shortTerm": ["action 1", "action 2", "action 3"],
-    "mediumTerm": ["action 1", "action 2", "action 3"],
-    "longTerm": ["action 1", "action 2", "action 3"]
+    "shortTerm": ["action 1 with expected outcome", "action 2", "action 3"],
+    "mediumTerm": ["action 1 with expected outcome", "action 2", "action 3"],
+    "longTerm": ["action 1 with expected outcome", "action 2", "action 3"]
   },
-  "recommendations": ["recommendation 1", "recommendation 2", "recommendation 3", "recommendation 4", "recommendation 5"],
+  "recommendations": ["recommendation 1 with ROI estimate", "recommendation 2", "recommendation 3", "recommendation 4", "recommendation 5"],
   "kpis": [
     {"name": "KPI Name", "value": "formatted value", "trend": "up|down|stable", "change": "+X%"},
     {"name": "KPI 2", "value": "value", "trend": "up", "change": "+Y%"}
@@ -107,12 +133,15 @@ REQUIRED JSON STRUCTURE:
   ]
 }
 
-IMPORTANT: 
-- You MUST generate exactly 4-6 charts. MANDATORY: at least 1 bar, 1 pie, 1 line, and 1 area chart. Each chart must have a DIFFERENT type.
-- KPIs should show real calculated metrics from the data with real numbers.
-- All text analysis should be detailed and actionable, not generic.
-- Each chart "data" array must have at least 3 items with real values from the dataset.
-- DO NOT return all charts as "bar". Mix the types!
+CRITICAL RULES:
+- Generate exactly 4-6 charts. MANDATORY: at least 1 bar, 1 pie, 1 line, and 1 area chart. Each MUST be a DIFFERENT type.
+- KPIs: include 4-6 real calculated metrics from the data with real numbers.
+- executiveScore.overall: 0-100 score. categories must have 4 items scored 0-100.
+- correlations: identify 3-5 real correlations from the data.
+- dataQuality: score/completeness/consistency are 0-100 percentages.
+- swot: derive from the actual data, not generic statements.
+- Each chart data array must have at least 3 items with real values from the dataset.
+- All analysis text must be SPECIFIC to this dataset - never generic.
 
 DATA:
 ${dataContent}`;
@@ -127,7 +156,7 @@ ${dataContent}`;
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: "You are an expert business data analyst. Return valid JSON only. No markdown code blocks. Generate multiple diverse chart types with real data values." },
+          { role: "system", content: "You are a world-class business data analyst and strategic consultant. Return valid JSON only. No markdown code blocks. Generate diverse chart types with real data values. Include SWOT analysis, executive scoring, correlations, and data quality assessment." },
           { role: "user", content: prompt },
         ],
       }),
@@ -161,6 +190,10 @@ ${dataContent}`;
       analysis = {
         diagnosis: { summary: rawText.substring(0, 500), findings: [], bottlenecks: [] },
         insights: { opportunities: [], risks: [], patterns: [] },
+        swot: { strengths: [], weaknesses: [], opportunities: [], threats: [] },
+        executiveScore: { overall: 0, categories: [], verdict: "" },
+        correlations: [],
+        dataQuality: { score: 0, completeness: 0, consistency: 0, observations: [] },
         actionPlan: { shortTerm: [], mediumTerm: [], longTerm: [] },
         recommendations: [rawText.substring(0, 300)],
         kpis: [],
@@ -168,7 +201,7 @@ ${dataContent}`;
       };
     }
 
-    // Migrate old chartsData format to new charts array
+    // Migrate old chartsData format
     let charts = Array.isArray(analysis.charts) ? analysis.charts : [];
     if (charts.length === 0 && analysis.chartsData) {
       const cd = analysis.chartsData;
@@ -184,15 +217,28 @@ ${dataContent}`;
     const safeAnalysis = {
       diagnosis: analysis.diagnosis || { summary: "No diagnosis available", findings: [], bottlenecks: [] },
       insights: analysis.insights || { opportunities: [], risks: [], patterns: [] },
+      swot: analysis.swot || { strengths: [], weaknesses: [], opportunities: [], threats: [] },
+      executiveScore: analysis.executiveScore || { overall: 0, categories: [], verdict: "" },
+      correlations: Array.isArray(analysis.correlations) ? analysis.correlations : [],
+      dataQuality: analysis.dataQuality || { score: 0, completeness: 0, consistency: 0, observations: [] },
       actionPlan: analysis.actionPlan || { shortTerm: [], mediumTerm: [], longTerm: [] },
       recommendations: Array.isArray(analysis.recommendations) ? analysis.recommendations : [],
       kpis: Array.isArray(analysis.kpis) ? analysis.kpis : [],
       charts,
     };
 
+    // Store new fields inside diagnosis JSON (to avoid schema migration)
+    const enrichedDiagnosis = {
+      ...safeAnalysis.diagnosis,
+      swot: safeAnalysis.swot,
+      executiveScore: safeAnalysis.executiveScore,
+      correlations: safeAnalysis.correlations,
+      dataQuality: safeAnalysis.dataQuality,
+    };
+
     const { error: updateError } = await supabase.from("analyses").update({
       status: "completed",
-      diagnosis: safeAnalysis.diagnosis,
+      diagnosis: enrichedDiagnosis,
       insights: safeAnalysis.insights,
       action_plan: safeAnalysis.actionPlan,
       recommendations: safeAnalysis.recommendations,
