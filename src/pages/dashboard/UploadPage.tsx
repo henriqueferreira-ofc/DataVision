@@ -97,8 +97,11 @@ export default function UploadPage() {
       setUploadingIndex(i);
 
       try {
-        // 1. Upload file to storage
-        const filePath = `${user.id}/${Date.now()}_${file.name}`;
+        // 1. Upload file to storage (sanitize filename to avoid "Invalid key")
+        const safeName = file.name
+          .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // remove accents
+          .replace(/[^a-zA-Z0-9._-]/g, "_"); // replace special chars
+        const filePath = `${user.id}/${Date.now()}_${safeName}`;
         const { error: uploadError } = await supabase.storage
           .from("uploads")
           .upload(filePath, file);
