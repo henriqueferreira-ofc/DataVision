@@ -20,6 +20,7 @@ import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
 } from "recharts";
 import { useState } from "react";
+import { deriveStrategicSections, clampScore, parseMetricValue, formatCurrency } from "@/lib/deriveStrategicSections";
 
 const COLORS = [
   "hsl(217,91%,60%)", "hsl(168,72%,43%)", "hsl(280,65%,60%)",
