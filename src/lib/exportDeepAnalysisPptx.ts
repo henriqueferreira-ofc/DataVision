@@ -38,7 +38,7 @@ function mapChartType(type: string): "bar" | "line" | "area" | "pie" | "doughnut
 }
 
 export function exportDeepAnalysisPptx(analysis: AnalysisData, language: string) {
-  const pt_ = language === "pt-BR";
+  const pt = language === "pt-BR";
   const pptx = new PptxGenJS();
   pptx.author = "Datavision Pro";
   pptx.title = `${pt ? "Análise Profunda" : "Deep Analysis"} - ${analysis.file_name}`;
