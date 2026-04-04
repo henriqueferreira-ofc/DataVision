@@ -234,7 +234,7 @@ export function exportDeepAnalysisPptx(analysis: AnalysisData, language: string)
   });
 
   // ── SWOT Analysis ──
-  const swot = diag?.swot;
+  const swot = diag?.swot || derived.swot;
   if (swot) {
     const s = pptx.addSlide();
     s.background = { fill: C.white };
