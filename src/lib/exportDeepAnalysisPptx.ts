@@ -178,8 +178,8 @@ export function exportDeepAnalysisPptx(analysis: AnalysisData, language: string)
   }
 
   // ── Charts ──
-  const chartsRaw = analysis.charts_data as any;
-  const charts: any[] = Array.isArray(chartsRaw) ? chartsRaw : [];
+  // charts already declared above
+  const charts = chartsList;
   charts.forEach((chart: any, ci: number) => {
     if (!chart.data?.length) return;
     const s = pptx.addSlide();
