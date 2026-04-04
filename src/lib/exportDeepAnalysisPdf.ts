@@ -459,7 +459,7 @@ export function exportDeepAnalysisPdf(analysis: AnalysisData, language: string) 
   }
 
   // ── Correlations ──
-  const correlations = diag?.correlations || [];
+  const correlations = diag?.correlations || derived.correlations;
   if (correlations.length) {
     sectionTitle(pt ? "CORRELAÇÕES IDENTIFICADAS" : "IDENTIFIED CORRELATIONS");
     const tableData = correlations.map((c: any) => [
