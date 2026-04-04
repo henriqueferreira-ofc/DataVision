@@ -152,7 +152,7 @@ export function exportDeepAnalysisPptx(analysis: AnalysisData, language: string)
   }
 
   // ── KPIs ──
-  const kpis = (analysis.kpis as any[]) || [];
+  // kpis already declared above
   if (kpis.length) {
     const s = pptx.addSlide();
     s.background = { fill: C.white };
