@@ -1,5 +1,6 @@
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+import { deriveStrategicSections } from "./deriveStrategicSections";
 
 interface AnalysisData {
   file_name: string;
