@@ -60,7 +60,7 @@ export function exportDeepAnalysisPptx(analysis: AnalysisData, language: string)
   };
 
   // ── Derive fallback strategic sections ──
-  const pt = language === "pt-BR";
+  const pt = pt_;
   const kpis = (analysis.kpis as any[]) || [];
   const chartsRaw = analysis.charts_data as any;
   const chartsList: any[] = Array.isArray(chartsRaw) ? chartsRaw : [];
