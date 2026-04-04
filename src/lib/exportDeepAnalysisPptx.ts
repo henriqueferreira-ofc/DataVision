@@ -1,4 +1,5 @@
 import PptxGenJS from "pptxgenjs";
+import { deriveStrategicSections } from "./deriveStrategicSections";
 
 interface AnalysisData {
   file_name: string;
