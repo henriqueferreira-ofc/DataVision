@@ -1,5 +1,6 @@
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+import { deriveStrategicSections } from "./deriveStrategicSections";
 
 interface AnalysisData {
   file_name: string;
@@ -291,8 +292,14 @@ export function exportDeepAnalysisPdf(analysis: AnalysisData, language: string) 
 
   // ── Executive Score + Data Quality ──
   const diag = analysis.diagnosis as any;
-  const executiveScore = diag?.executiveScore;
-  const dataQuality = diag?.dataQuality;
+  const insightsRaw = analysis.insights as any;
+  const kpisArr = (analysis.kpis as any[]) || [];
+  const chartsArr: any[] = Array.isArray(analysis.charts_data) ? analysis.charts_data as any[] : [];
+  const recsArr = (analysis.recommendations as string[]) || [];
+  const derived = deriveStrategicSections({ diagnosis: diag, insights: insightsRaw, kpis: kpisArr, charts: chartsArr, recommendations: recsArr, pt });
+
+  const executiveScore = diag?.executiveScore || derived.executiveScore;
+  const dataQuality = diag?.dataQuality || derived.dataQuality;
 
   if (executiveScore || dataQuality) {
     sectionTitle(pt ? "VISÃO EXECUTIVA" : "EXECUTIVE OVERVIEW");
@@ -409,7 +416,7 @@ export function exportDeepAnalysisPdf(analysis: AnalysisData, language: string) 
   }
 
   // ── SWOT Analysis ──
-  const swot = diag?.swot;
+  const swot = diag?.swot || derived.swot;
   if (swot) {
     sectionTitle(pt ? "ANÁLISE SWOT" : "SWOT ANALYSIS");
     const swotSections = [
@@ -452,7 +459,7 @@ export function exportDeepAnalysisPdf(analysis: AnalysisData, language: string) 
   }
 
   // ── Correlations ──
-  const correlations = diag?.correlations || [];
+  const correlations = diag?.correlations || derived.correlations;
   if (correlations.length) {
     sectionTitle(pt ? "CORRELAÇÕES IDENTIFICADAS" : "IDENTIFIED CORRELATIONS");
     const tableData = correlations.map((c: any) => [

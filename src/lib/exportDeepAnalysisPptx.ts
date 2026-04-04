@@ -1,4 +1,5 @@
 import PptxGenJS from "pptxgenjs";
+import { deriveStrategicSections } from "./deriveStrategicSections";
 
 interface AnalysisData {
   file_name: string;
@@ -58,6 +59,24 @@ export function exportDeepAnalysisPptx(analysis: AnalysisData, language: string)
     slide.addShape(pptx.ShapeType.rect, { x: 0.5, y: 0.85, w: 1.5, h: 0.06, fill: { color: C.blue } });
   };
 
+  // ── Derive fallback strategic sections ──
+  // pt already declared above
+  const kpis = (analysis.kpis as any[]) || [];
+  const chartsRaw = analysis.charts_data as any;
+  const chartsList: any[] = Array.isArray(chartsRaw) ? chartsRaw : [];
+  const diagnosisRaw = analysis.diagnosis as any;
+  const insightsRaw = analysis.insights as any;
+  const recsRaw = (analysis.recommendations as string[]) || [];
+
+  const derived = deriveStrategicSections({
+    diagnosis: diagnosisRaw,
+    insights: insightsRaw,
+    kpis,
+    charts: chartsList,
+    recommendations: recsRaw,
+    pt,
+  });
+
   // ── Cover ──
   const cover = pptx.addSlide();
   cover.background = { fill: C.navy };
@@ -72,9 +91,9 @@ export function exportDeepAnalysisPptx(analysis: AnalysisData, language: string)
   });
 
   // ── Executive Score + Data Quality ──
-  const diag = analysis.diagnosis as any;
-  const executiveScore = diag?.executiveScore;
-  const dataQuality = diag?.dataQuality;
+  const diag = diagnosisRaw;
+  const executiveScore = diag?.executiveScore || derived.executiveScore;
+  const dataQuality = diag?.dataQuality || derived.dataQuality;
 
   if (executiveScore || dataQuality) {
     const s = pptx.addSlide();
@@ -133,7 +152,7 @@ export function exportDeepAnalysisPptx(analysis: AnalysisData, language: string)
   }
 
   // ── KPIs ──
-  const kpis = (analysis.kpis as any[]) || [];
+  // kpis already declared above
   if (kpis.length) {
     const s = pptx.addSlide();
     s.background = { fill: C.white };
@@ -159,8 +178,8 @@ export function exportDeepAnalysisPptx(analysis: AnalysisData, language: string)
   }
 
   // ── Charts ──
-  const chartsRaw = analysis.charts_data as any;
-  const charts: any[] = Array.isArray(chartsRaw) ? chartsRaw : [];
+  // charts already declared above
+  const charts = chartsList;
   charts.forEach((chart: any, ci: number) => {
     if (!chart.data?.length) return;
     const s = pptx.addSlide();
@@ -215,7 +234,7 @@ export function exportDeepAnalysisPptx(analysis: AnalysisData, language: string)
   });
 
   // ── SWOT Analysis ──
-  const swot = diag?.swot;
+  const swot = diag?.swot || derived.swot;
   if (swot) {
     const s = pptx.addSlide();
     s.background = { fill: C.white };
@@ -243,7 +262,7 @@ export function exportDeepAnalysisPptx(analysis: AnalysisData, language: string)
   }
 
   // ── Correlations ──
-  const correlations = diag?.correlations || [];
+  const correlations = diag?.correlations || derived.correlations;
   if (correlations.length) {
     const s = pptx.addSlide();
     s.background = { fill: C.white };
