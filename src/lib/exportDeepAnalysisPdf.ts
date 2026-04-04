@@ -416,7 +416,7 @@ export function exportDeepAnalysisPdf(analysis: AnalysisData, language: string) 
   }
 
   // ── SWOT Analysis ──
-  const swot = diag?.swot;
+  const swot = diag?.swot || derived.swot;
   if (swot) {
     sectionTitle(pt ? "ANÁLISE SWOT" : "SWOT ANALYSIS");
     const swotSections = [
