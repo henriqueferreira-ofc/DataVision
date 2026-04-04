@@ -262,7 +262,7 @@ export function exportDeepAnalysisPptx(analysis: AnalysisData, language: string)
   }
 
   // ── Correlations ──
-  const correlations = diag?.correlations || [];
+  const correlations = diag?.correlations || derived.correlations;
   if (correlations.length) {
     const s = pptx.addSlide();
     s.background = { fill: C.white };
