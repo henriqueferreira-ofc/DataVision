@@ -33,7 +33,7 @@ export function Navbar() {
           <Button variant="ghost" size="sm" asChild>
             <Link to="/login">{t.nav.login}</Link>
           </Button>
-          <Button size="sm" asChild className="active:scale-[0.97]">
+          <Button size="sm" asChild className="bg-gradient-to-r from-primary to-accent text-white shadow-md shadow-primary/25 transition-transform hover:scale-[1.03] active:scale-[0.97]">
             <Link to="/signup">{t.nav.signup}</Link>
           </Button>
         </div>
