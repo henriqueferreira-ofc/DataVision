@@ -47,57 +47,71 @@ export function PricingSection() {
   ];
 
   return (
-    <section id="pricing" className="bg-muted/30 py-24 md:py-32">
+    <section id="pricing" className="relative overflow-hidden py-24 md:py-32">
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-transparent via-muted/30 to-transparent" />
+      <div className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-[120px]" />
+
       <div className="container mx-auto px-4">
         <ScrollReveal className="mx-auto max-w-2xl text-center">
-          <h2 className="text-balance text-3xl font-bold tracking-tight md:text-4xl">{t.pricing.title}</h2>
+          <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">Pricing</span>
+          <h2 className="mt-4 text-balance text-3xl font-bold tracking-tight md:text-5xl">
+            <span className="text-gradient">{t.pricing.title}</span>
+          </h2>
           <p className="mt-4 text-lg text-muted-foreground">{t.pricing.subtitle}</p>
 
-          <div className="mt-8 inline-flex items-center rounded-full border bg-card p-1">
-            <button onClick={() => setYearly(false)} className={cn("rounded-full px-5 py-2 text-sm font-medium transition-all", !yearly ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}>
+          <div className="mt-8 inline-flex items-center rounded-full border bg-card/80 p-1 backdrop-blur">
+            <button onClick={() => setYearly(false)} className={cn("rounded-full px-5 py-2 text-sm font-medium transition-all", !yearly ? "bg-primary text-primary-foreground shadow-md" : "text-muted-foreground hover:text-foreground")}>
               {t.pricing.monthly}
             </button>
-            <button onClick={() => setYearly(true)} className={cn("rounded-full px-5 py-2 text-sm font-medium transition-all", yearly ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}>
+            <button onClick={() => setYearly(true)} className={cn("rounded-full px-5 py-2 text-sm font-medium transition-all", yearly ? "bg-primary text-primary-foreground shadow-md" : "text-muted-foreground hover:text-foreground")}>
               {t.pricing.yearly}
-              <span className="ml-1.5 text-xs opacity-75">{pt ? "(-58%)" : "(-58%)"}</span>
+              <span className="ml-1.5 rounded-full bg-accent/20 px-1.5 py-0.5 text-[10px] font-semibold text-accent">-58%</span>
             </button>
           </div>
         </ScrollReveal>
 
-        <div className="mx-auto mt-12 grid max-w-3xl gap-6 lg:grid-cols-2">
+        <div className="mx-auto mt-12 grid max-w-4xl gap-6 lg:grid-cols-2">
           {plans.map((plan, i) => (
             <ScrollReveal key={plan.name} delay={i * 100}>
               <div className={cn(
-                "relative flex flex-col rounded-xl border bg-card p-8 shadow-sm transition-shadow duration-300 hover:shadow-md",
-                plan.popular && "border-primary shadow-lg shadow-primary/10 ring-1 ring-primary"
+                "group relative flex h-full flex-col overflow-hidden rounded-2xl border bg-card/80 p-8 backdrop-blur card-hover",
+                plan.popular && "border-primary/40 glow-primary"
               )}>
                 {plan.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-4 py-1 text-xs font-semibold text-primary-foreground">
-                    {t.pricing.popular}
-                  </div>
+                  <>
+                    <div className="absolute -right-20 -top-20 h-48 w-48 rounded-full bg-gradient-to-br from-primary to-accent opacity-20 blur-3xl" />
+                    <div className="absolute -top-px left-8 right-8 h-px bg-gradient-to-r from-transparent via-primary to-transparent" />
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-primary to-accent px-4 py-1 text-xs font-semibold text-white shadow-lg">
+                      ★ {t.pricing.popular}
+                    </div>
+                  </>
                 )}
                 <div>
-                  <h3 className="text-xl font-bold">{plan.name}</h3>
+                  <h3 className="text-xl font-bold tracking-tight">{plan.name}</h3>
                   <p className="mt-1 text-sm text-muted-foreground">{plan.description}</p>
                 </div>
-                <div className="mt-6">
-                  <span className="text-4xl font-extrabold tabular-nums">{plan.price}</span>
+                <div className="mt-6 flex items-baseline gap-1">
+                  <span className={cn("text-5xl font-extrabold tabular-nums", plan.popular && "text-gradient")}>{plan.price}</span>
                   <span className="text-muted-foreground">{plan.period}</span>
                 </div>
                 <ul className="mt-8 flex-1 space-y-3">
                   {plan.features.map((f) => (
                     <li key={f.text} className="flex items-start gap-3 text-sm">
                       {f.included ? (
-                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
+                        <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent/15 text-accent">
+                          <Check className="h-3 w-3" strokeWidth={3} />
+                        </span>
                       ) : (
-                        <X className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/40" />
+                        <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground/50">
+                          <X className="h-3 w-3" />
+                        </span>
                       )}
                       <span className={cn(!f.included && "text-muted-foreground/60")}>{f.text}</span>
                     </li>
                   ))}
                 </ul>
                 <div className="mt-8">
-                  <Button className={cn("w-full active:scale-[0.97]", plan.popular && "shadow-lg shadow-primary/20")} variant={plan.popular ? "default" : "outline"} asChild>
+                  <Button className={cn("w-full transition-transform hover:scale-[1.02] active:scale-[0.97]", plan.popular && "glow-primary")} variant={plan.popular ? "default" : "outline"} asChild>
                     <Link to="/signup">{t.pricing.cta}</Link>
                   </Button>
                 </div>
