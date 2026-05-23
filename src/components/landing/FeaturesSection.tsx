@@ -7,7 +7,7 @@ export function FeaturesSection() {
 
   const features = [
     { icon: Upload, gradient: "from-primary to-blue-400", ...t.features.upload },
-    { icon: BrainCircuit, gradient: "from-purple-500 to-pink-500", ...t.features.analysis, featured: true },
+    { icon: BrainCircuit, gradient: "from-purple-500 to-pink-500", ...t.features.analysis },
     { icon: LayoutDashboard, gradient: "from-accent to-emerald-400", ...t.features.dashboard },
     { icon: FileText, gradient: "from-amber-500 to-orange-500", ...t.features.reports },
     { icon: Sparkles, gradient: "from-fuchsia-500 to-violet-500", ...t.features.ai },
@@ -32,7 +32,7 @@ export function FeaturesSection() {
         <div className="mx-auto mt-16 grid max-w-6xl gap-5 md:grid-cols-2 lg:grid-cols-3">
           {features.map((f, i) => (
             <ScrollReveal key={f.title} delay={i * 70}>
-              <div className={`group relative h-full overflow-hidden rounded-2xl border bg-card/70 p-6 card-hover backdrop-blur ${f.featured ? "lg:row-span-1" : ""}`}>
+              <div className="group relative h-full overflow-hidden rounded-2xl border bg-card/70 p-6 card-hover backdrop-blur">
                 {/* Decorative gradient blob */}
                 <div className={`absolute -right-16 -top-16 h-40 w-40 rounded-full bg-gradient-to-br ${f.gradient} opacity-0 blur-3xl transition-opacity duration-500 group-hover:opacity-30`} />
 
