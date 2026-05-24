@@ -25,14 +25,14 @@ export const PLANS = {
   basic: {
     monthly: { priceId: "price_1TDP7PJWceWgSe2VBNywAzSR", productId: "prod_UBmgETBLICbzxM" },
     yearly: { priceId: "price_1TDP7qJWceWgSe2VjMAjlCtP", productId: "prod_UBmhkRTvb5KgWP" },
-    monthlyPrice: "R$19,90",
-    yearlyPrice: "R$99,90",
+    monthlyPrice: "R$9,90",
+    yearlyPrice: "R$49,90",
   },
   pro: {
     monthly: { priceId: "price_1TDP8zJWceWgSe2V2RrNTlbK", productId: "prod_UBmiH7QE3gQkMV" },
     yearly: { priceId: "price_1TDPAzJWceWgSe2V9kh7wZgL", productId: "prod_UBmk2vWMVHeWfa" },
-    monthlyPrice: "R$29,90",
-    yearlyPrice: "R$129,90",
+    monthlyPrice: "R$19,90",
+    yearlyPrice: "R$99,90",
   },
 } as const;
 
