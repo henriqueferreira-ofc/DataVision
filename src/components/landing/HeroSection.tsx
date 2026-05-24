@@ -95,12 +95,18 @@ export function HeroSection() {
         </div>
 
         {/* Dashboard preview mockup */}
-        <div className="mx-auto mt-20 max-w-5xl animate-fade-up" style={{ animationDelay: "450ms", opacity: 0 }}>
-          <div className="relative">
-            <div className="absolute -inset-4 -z-10 rounded-3xl bg-gradient-to-tr from-primary/30 via-accent/20 to-purple-500/30 blur-2xl" />
+        <div className="mx-auto mt-20 max-w-5xl animate-fade-up [perspective:1400px]" style={{ animationDelay: "450ms", opacity: 0 }}>
+          <div
+            ref={tiltRef}
+            onMouseMove={handleMove}
+            onMouseLeave={handleLeave}
+            className="relative animate-tilt-float [transform-style:preserve-3d] transition-transform duration-300 ease-out"
+            style={{ transform: "rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg))" }}
+          >
+            <div className="absolute -inset-4 -z-10 rounded-3xl bg-gradient-to-tr from-primary/30 via-accent/20 to-purple-500/30 blur-2xl animate-gradient-x bg-[length:200%_200%]" />
             <div className="glass overflow-hidden rounded-2xl shadow-2xl">
               {/* Window chrome */}
-              <div className="flex items-center gap-2 border-b border-border/60 bg-muted/40 px-4 py-3">
+              <div className="relative flex items-center gap-2 border-b border-border/60 bg-muted/40 px-4 py-3">
                 <div className="flex gap-1.5">
                   <span className="h-2.5 w-2.5 rounded-full bg-red-400/80" />
                   <span className="h-2.5 w-2.5 rounded-full bg-yellow-400/80" />
@@ -109,23 +115,29 @@ export function HeroSection() {
                 <div className="mx-auto flex items-center gap-2 rounded-md bg-background/60 px-3 py-1 text-xs text-muted-foreground">
                   <BarChart3 className="h-3 w-3" /> datavision.app/dashboard
                 </div>
+                <span className="pointer-events-none absolute inset-x-0 -bottom-px h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
               </div>
 
               {/* Mock dashboard */}
               <div className="grid gap-4 p-5 sm:grid-cols-4">
                 {[
-                  { icon: TrendingUp, label: "Revenue", value: "R$ 248.5K", delta: "+12.4%", color: "text-emerald-500" },
-                  { icon: Activity, label: "Active Users", value: "8,492", delta: "+5.1%", color: "text-primary" },
-                  { icon: Sparkles, label: "Conversions", value: "1,284", delta: "+8.7%", color: "text-accent" },
-                  { icon: BarChart3, label: "AOV", value: "R$ 193", delta: "+2.3%", color: "text-purple-500" },
+                  { icon: TrendingUp, label: "Revenue", values: revenueVals, delta: "+12.4%", color: "text-emerald-500" },
+                  { icon: Activity, label: "Active Users", values: userVals, delta: "+5.1%", color: "text-primary" },
+                  { icon: Sparkles, label: "Conversions", values: convVals, delta: "+8.7%", color: "text-accent" },
+                  { icon: BarChart3, label: "AOV", values: aovVals, delta: "+2.3%", color: "text-purple-500" },
                 ].map((k, i) => (
-                  <div key={i} className="rounded-xl border bg-card/70 p-3 text-left">
+                  <div key={i} className="group relative overflow-hidden rounded-xl border bg-card/70 p-3 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg">
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{k.label}</span>
-                      <k.icon className={`h-3.5 w-3.5 ${k.color}`} />
+                      <k.icon className={`h-3.5 w-3.5 ${k.color} transition-transform group-hover:scale-110`} />
                     </div>
-                    <div className="mt-1.5 text-lg font-bold tabular-nums">{k.value}</div>
-                    <div className={`text-[11px] font-medium ${k.color}`}>{k.delta}</div>
+                    <div key={tick} className="mt-1.5 text-lg font-bold tabular-nums animate-count-up">
+                      {k.values[tick % k.values.length]}
+                    </div>
+                    <div className={`flex items-center gap-1 text-[11px] font-medium ${k.color}`}>
+                      <span className="inline-block h-1 w-1 rounded-full bg-current animate-pulse" />
+                      {k.delta}
+                    </div>
                   </div>
                 ))}
 
@@ -135,14 +147,21 @@ export function HeroSection() {
                     <span className="text-xs font-semibold">Performance</span>
                     <div className="flex gap-1">
                       {["7D", "30D", "90D"].map((p, i) => (
-                        <span key={p} className={`rounded px-1.5 py-0.5 text-[10px] ${i === 1 ? "bg-primary/15 text-primary" : "text-muted-foreground"}`}>{p}</span>
+                        <span key={p} className={`rounded px-1.5 py-0.5 text-[10px] transition-colors ${i === 1 ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground"}`}>{p}</span>
                       ))}
                     </div>
                   </div>
                   <div className="flex h-32 items-end gap-1.5">
                     {[40, 65, 50, 78, 60, 92, 70, 88, 55, 95, 72, 84].map((h, i) => (
-                      <div key={i} className="flex-1 origin-bottom rounded-t bg-gradient-to-t from-primary/80 to-accent/80 animate-bar-grow"
-                        style={{ height: `${h}%`, animationDelay: `${i * 60 + 600}ms` }} />
+                      <div
+                        key={i}
+                        className="flex-1 origin-bottom rounded-t bg-gradient-to-t from-primary/80 to-accent/80 animate-bar-pulse hover:from-primary hover:to-accent"
+                        style={{
+                          height: `${h}%`,
+                          ["--bar-h" as any]: "1",
+                          animationDelay: `${i * 180}ms`,
+                        } as React.CSSProperties}
+                      />
                     ))}
                   </div>
                 </div>
@@ -151,10 +170,13 @@ export function HeroSection() {
                 <div className="rounded-xl border bg-card/70 p-4">
                   <span className="text-xs font-semibold">Top Insights</span>
                   <ul className="mt-3 space-y-2.5">
-                    {["Growth trending up", "Conversion +18% MoM", "Retention healthy"].map((t, i) => (
+                    {["Growth trending up", "Conversion +18% MoM", "Retention healthy"].map((txt, i) => (
                       <li key={i} className="flex items-start gap-2 text-[11px] text-muted-foreground">
-                        <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-gradient-to-br from-primary to-accent" />
-                        {t}
+                        <span className="relative mt-1 flex h-1.5 w-1.5 shrink-0">
+                          <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-70 animate-pulse-ring" />
+                          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-gradient-to-br from-primary to-accent" />
+                        </span>
+                        {txt}
                       </li>
                     ))}
                   </ul>
