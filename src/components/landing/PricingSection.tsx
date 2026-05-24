@@ -126,6 +126,7 @@ export function PricingSection() {
                   </Button>
                 </div>
               </div>
+              </div>
             </ScrollReveal>
           ))}
         </div>
