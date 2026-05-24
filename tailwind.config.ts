@@ -131,7 +131,7 @@ export default {
         "tilt-float": "tilt-float 9s ease-in-out infinite",
         "count-up": "count-up 0.6s ease-out forwards",
       },
-      },
+
     },
   },
   plugins: [require("tailwindcss-animate")],
