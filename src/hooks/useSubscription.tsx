@@ -34,7 +34,6 @@ export const PLANS = {
     monthlyPrice: "R$19,90",
     yearlyPrice: "R$99,90",
   },
-  },
 } as const;
 
 export function isPro(plan: PlanType): boolean {
