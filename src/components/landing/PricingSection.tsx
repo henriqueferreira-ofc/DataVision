@@ -14,7 +14,7 @@ export function PricingSection() {
   const plans = [
     {
       name: "Básico",
-      price: yearly ? "R$99,90" : "R$19,90",
+      price: yearly ? "R$49,90" : "R$9,90",
       period: yearly ? (pt ? "/ano" : "/yr") : (pt ? "/mês" : "/mo"),
       description: pt ? "Para profissionais começando com análise de dados" : "For professionals getting started with data analysis",
       features: [
