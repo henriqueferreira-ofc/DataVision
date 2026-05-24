@@ -1,10 +1,42 @@
 import { Link } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Zap, TrendingUp, BarChart3, Sparkles, Activity } from "lucide-react";
 
 export function HeroSection() {
   const { t } = useLanguage();
+  const tiltRef = useRef<HTMLDivElement>(null);
+  const [tick, setTick] = useState(0);
+
+  // Live values rotation
+  useEffect(() => {
+    const id = setInterval(() => setTick((v) => v + 1), 2600);
+    return () => clearInterval(id);
+  }, []);
+
+  // Mouse parallax tilt
+  const handleMove = (e: React.MouseEvent) => {
+    const el = tiltRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width - 0.5;
+    const py = (e.clientY - r.top) / r.height - 0.5;
+    el.style.setProperty("--rx", `${(-py * 6).toFixed(2)}deg`);
+    el.style.setProperty("--ry", `${(px * 8).toFixed(2)}deg`);
+  };
+  const handleLeave = () => {
+    const el = tiltRef.current;
+    if (!el) return;
+    el.style.setProperty("--rx", "0deg");
+    el.style.setProperty("--ry", "0deg");
+  };
+
+  const revenueVals = ["R$ 248.5K", "R$ 251.2K", "R$ 256.8K", "R$ 261.4K"];
+  const userVals = ["8,492", "8,517", "8,544", "8,572"];
+  const convVals = ["1,284", "1,291", "1,298", "1,305"];
+  const aovVals = ["R$ 193", "R$ 195", "R$ 198", "R$ 201"];
+
 
   return (
     <section className="relative overflow-hidden pt-32 pb-24 md:pt-40 md:pb-32">
