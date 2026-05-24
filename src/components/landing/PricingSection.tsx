@@ -74,16 +74,26 @@ export function PricingSection() {
           {plans.map((plan, i) => (
             <ScrollReveal key={plan.name} delay={i * 100}>
               <div className={cn(
-                "group relative flex h-full flex-col overflow-hidden rounded-2xl border bg-card/80 p-8 backdrop-blur card-hover",
-                plan.popular && "border-primary/40 glow-primary"
+                "group relative h-full",
+                plan.popular && "lg:-mt-4"
+              )}>
+                {plan.popular && (
+                  <div className="absolute -inset-px -z-10 rounded-2xl bg-gradient-to-br from-primary via-accent to-primary bg-[length:200%_200%] opacity-70 blur-md animate-gradient-x" />
+                )}
+                {plan.popular && (
+                  <div className="absolute -top-4 left-1/2 z-20 -translate-x-1/2 rounded-full bg-gradient-to-r from-primary to-accent px-4 py-1.5 text-xs font-semibold text-white shadow-lg ring-2 ring-background">
+                    ★ {t.pricing.popular}
+                  </div>
+                )}
+              <div className={cn(
+                "relative flex h-full flex-col overflow-hidden rounded-2xl border bg-card/80 p-8 backdrop-blur card-hover transition-transform duration-500 group-hover:-translate-y-1",
+                plan.popular && "border-primary/40"
               )}>
                 {plan.popular && (
                   <>
-                    <div className="absolute -right-20 -top-20 h-48 w-48 rounded-full bg-gradient-to-br from-primary to-accent opacity-20 blur-3xl" />
+                    <div className="absolute -right-20 -top-20 h-48 w-48 rounded-full bg-gradient-to-br from-primary to-accent opacity-20 blur-3xl animate-float-slow" />
+                    <div className="absolute -bottom-24 -left-16 h-48 w-48 rounded-full bg-gradient-to-tr from-accent/30 to-primary/20 blur-3xl animate-float-slow" style={{ animationDelay: '1.5s' }} />
                     <div className="absolute -top-px left-8 right-8 h-px bg-gradient-to-r from-transparent via-primary to-transparent" />
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-primary to-accent px-4 py-1 text-xs font-semibold text-white shadow-lg">
-                      ★ {t.pricing.popular}
-                    </div>
                   </>
                 )}
                 <div>
@@ -115,6 +125,7 @@ export function PricingSection() {
                     <Link to="/signup">{t.pricing.cta}</Link>
                   </Button>
                 </div>
+              </div>
               </div>
             </ScrollReveal>
           ))}
