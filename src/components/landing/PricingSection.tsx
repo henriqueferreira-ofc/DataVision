@@ -1,22 +1,50 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { Button } from "@/components/ui/button";
-import { Check, X } from "lucide-react";
+import { Check, X, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
+import { PLANS } from "@/hooks/useSubscription";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export function PricingSection() {
   const { t, language } = useLanguage();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
   const [yearly, setYearly] = useState(false);
+  const [loadingPro, setLoadingPro] = useState(false);
   const pt = language === "pt-BR";
+
+  const handleProCheckout = async () => {
+    if (!user) {
+      navigate(`/signup?plan=pro&billing=${yearly ? "yearly" : "monthly"}`);
+      return;
+    }
+    setLoadingPro(true);
+    try {
+      const priceId = yearly ? PLANS.pro.yearly.priceId : PLANS.pro.monthly.priceId;
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: { priceId },
+      });
+      if (error) throw error;
+      if (data?.url) window.open(data.url, "_blank");
+    } catch (err: any) {
+      toast({ variant: "destructive", title: "Erro", description: err.message });
+    } finally {
+      setLoadingPro(false);
+    }
+  };
 
   const plans = [
     {
-      name: "Básico",
-      price: yearly ? "R$49,90" : "R$9,90",
-      period: yearly ? (pt ? "/ano" : "/yr") : (pt ? "/mês" : "/mo"),
-      description: pt ? "Para profissionais começando com análise de dados" : "For professionals getting started with data analysis",
+      name: pt ? "Básico" : "Basic",
+      price: pt ? "Grátis" : "Free",
+      period: "",
+      description: pt ? "Comece agora sem pagar nada" : "Get started for free",
       features: [
         { text: pt ? "Pesquisa padrão" : "Standard search", included: true },
         { text: pt ? "Visualização de dados simples" : "Simple data visualization", included: true },
@@ -27,6 +55,8 @@ export function PricingSection() {
         { text: pt ? "Gráficos avançados" : "Advanced charts", included: false },
       ],
       popular: false,
+      cta: pt ? "Comece agora" : "Get started",
+      isPro: false,
     },
     {
       name: "Pro",
@@ -43,6 +73,8 @@ export function PricingSection() {
         { text: pt ? "Suporte prioritário" : "Priority support", included: true },
       ],
       popular: true,
+      cta: pt ? "Assinar Pro" : "Subscribe Pro",
+      isPro: true,
     },
   ];
 
@@ -102,7 +134,7 @@ export function PricingSection() {
                 </div>
                 <div className="mt-6 flex items-baseline gap-1">
                   <span className={cn("text-5xl font-extrabold tabular-nums", plan.popular && "text-gradient")}>{plan.price}</span>
-                  <span className="text-muted-foreground">{plan.period}</span>
+                  {plan.period && <span className="text-muted-foreground">{plan.period}</span>}
                 </div>
                 <ul className="mt-8 flex-1 space-y-3">
                   {plan.features.map((f) => (
@@ -121,9 +153,19 @@ export function PricingSection() {
                   ))}
                 </ul>
                 <div className="mt-8">
-                  <Button className={cn("w-full transition-transform hover:scale-[1.02] active:scale-[0.97]", plan.popular && "glow-primary")} variant={plan.popular ? "default" : "outline"} asChild>
-                    <Link to="/signup">{t.pricing.cta}</Link>
-                  </Button>
+                  {plan.isPro ? (
+                    <Button
+                      className={cn("w-full transition-transform hover:scale-[1.02] active:scale-[0.97] glow-primary")}
+                      onClick={handleProCheckout}
+                      disabled={loadingPro}
+                    >
+                      {loadingPro ? <Loader2 className="h-4 w-4 animate-spin" /> : plan.cta}
+                    </Button>
+                  ) : (
+                    <Button className="w-full transition-transform hover:scale-[1.02] active:scale-[0.97]" variant="outline" asChild>
+                      <Link to="/signup">{plan.cta}</Link>
+                    </Button>
+                  )}
                 </div>
               </div>
               </div>
