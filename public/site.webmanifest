@@ -1,0 +1,17 @@
+{
+  "name": "DataVision",
+  "short_name": "DataVision",
+  "description": "Transform raw data into strategic decisions with AI-powered analysis, insights, and executive reports.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#3b82f6",
+  "icons": [
+    {
+      "src": "favicon.png",
+      "sizes": "800x800",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
