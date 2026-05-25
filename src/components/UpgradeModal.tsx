@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { PLANS } from "@/hooks/useSubscription";
-import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Crown, Loader2, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { getProCheckoutUrl } from "@/lib/checkout";
 
 interface UpgradeModalProps {
   open: boolean;
@@ -24,16 +24,11 @@ export function UpgradeModal({ open, onOpenChange, feature }: UpgradeModalProps)
 
   const handleCheckout = async () => {
     const billing = yearly ? "yearly" : "monthly";
-    const priceId = PLANS.pro[billing].priceId;
     setLoading(`pro-${billing}`);
     try {
-      const { data, error } = await supabase.functions.invoke("create-checkout", {
-        body: { priceId },
-      });
-      if (error) throw error;
-      if (data?.url) window.open(data.url, "_blank");
-    } catch (err: any) {
-      toast({ variant: "destructive", title: "Erro", description: err.message });
+      window.open(await getProCheckoutUrl(billing), "_blank");
+    } catch (err) {
+      toast({ variant: "destructive", title: "Erro", description: err instanceof Error ? err.message : "Erro inesperado" });
     } finally {
       setLoading(null);
     }

@@ -1,37 +1,28 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { Button } from "@/components/ui/button";
 import { Check, X, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/hooks/useAuth";
-import { PLANS } from "@/hooks/useSubscription";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { getProCheckoutUrl } from "@/lib/checkout";
 
 export function PricingSection() {
   const { t, language } = useLanguage();
-  const { user } = useAuth();
   const { toast } = useToast();
-  const navigate = useNavigate();
   const [yearly, setYearly] = useState(false);
   const [loadingPro, setLoadingPro] = useState(false);
   const pt = language === "pt-BR";
 
   const handleProCheckout = async () => {
+    if (loadingPro) return;
+
     setLoadingPro(true);
     try {
-      const priceId = yearly ? PLANS.pro.yearly.priceId : PLANS.pro.monthly.priceId;
-      const { data, error } = await supabase.functions.invoke("create-checkout", {
-        body: { priceId },
-      });
-      if (error) throw error;
-      if (data?.url) {
-        window.location.href = data.url;
-      }
-    } catch (err: any) {
-      toast({ variant: "destructive", title: "Erro", description: err.message });
+      window.location.href = await getProCheckoutUrl(yearly ? "yearly" : "monthly");
+    } catch (err) {
+      toast({ variant: "destructive", title: "Erro", description: err instanceof Error ? err.message : "Erro inesperado" });
     } finally {
       setLoadingPro(false);
     }
@@ -105,8 +96,19 @@ export function PricingSection() {
             <ScrollReveal key={plan.name} delay={i * 100}>
               <div className={cn(
                 "group relative h-full",
-                plan.popular && "lg:-mt-4"
-              )}>
+                plan.popular && "cursor-pointer lg:-mt-4"
+              )}
+                onClick={plan.isPro ? handleProCheckout : undefined}
+                onKeyDown={(event) => {
+                  if (!plan.isPro || loadingPro) return;
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    handleProCheckout();
+                  }
+                }}
+                role={plan.isPro ? "button" : undefined}
+                tabIndex={plan.isPro ? 0 : undefined}
+              >
                 {plan.popular && (
                   <div className="absolute -inset-px -z-10 rounded-2xl bg-gradient-to-br from-primary via-accent to-primary bg-[length:200%_200%] opacity-70 blur-md animate-gradient-x" />
                 )}
@@ -117,7 +119,7 @@ export function PricingSection() {
                 )}
               <div className={cn(
                 "relative flex h-full flex-col overflow-hidden rounded-2xl border bg-card/80 p-8 backdrop-blur card-hover transition-transform duration-500 group-hover:-translate-y-1",
-                plan.popular && "border-primary/40"
+                plan.popular && "cursor-pointer border-primary/40"
               )}>
                 {plan.popular && (
                   <>
@@ -154,7 +156,10 @@ export function PricingSection() {
                   {plan.isPro ? (
                     <Button
                       className={cn("w-full transition-transform hover:scale-[1.02] active:scale-[0.97] glow-primary")}
-                      onClick={handleProCheckout}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleProCheckout();
+                      }}
                       disabled={loadingPro}
                     >
                       {loadingPro ? <Loader2 className="h-4 w-4 animate-spin" /> : plan.cta}
