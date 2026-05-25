@@ -40,7 +40,7 @@ export function PricingSection() {
   const plans = [
     {
       name: pt ? "Básico" : "Basic",
-      price: pt ? "Grátis" : "Free",
+      price: "Free",
       period: "",
       description: pt ? "Comece agora sem pagar nada" : "Get started for free",
       features: [
