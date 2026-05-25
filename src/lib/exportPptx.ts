@@ -25,14 +25,14 @@ const COLORS = {
 export function exportAnalysisPptx(analysis: AnalysisData, language: string) {
   const isPt = language === "pt-BR";
   const pptx = new PptxGenJS();
-  pptx.author = "Datavision Pro";
+  pptx.author = "DataVision";
   pptx.title = `${isPt ? "Relatório" : "Report"} - ${analysis.file_name}`;
   pptx.layout = "LAYOUT_WIDE";
 
   const addFooter = (slide: any) => {
     slide.addText(
       [
-        { text: "Datavision Pro", options: { bold: true, color: COLORS.gray400, fontSize: 8 } },
+        { text: "DataVision", options: { bold: true, color: COLORS.gray400, fontSize: 8 } },
         { text: `  •  ${new Date(analysis.created_at).toLocaleDateString(language)}`, options: { color: COLORS.gray400, fontSize: 8 } },
       ],
       { x: 0.5, y: 7.0, w: 5, h: 0.3 }
@@ -43,7 +43,7 @@ export function exportAnalysisPptx(analysis: AnalysisData, language: string) {
   const cover = pptx.addSlide();
   cover.background = { fill: COLORS.navy };
   cover.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: 0.15, h: 7.5, fill: { color: COLORS.blue } });
-  cover.addText("D A T A V I S I O N   P R O", { x: 1, y: 1.5, w: 10, fontSize: 16, color: COLORS.blue, bold: true });
+  cover.addText("D A T A V I S I O N", { x: 1, y: 1.5, w: 10, fontSize: 16, color: COLORS.blue, bold: true });
   cover.addText(isPt ? "Relatório Executivo" : "Executive Report", { x: 1, y: 2.5, w: 10, fontSize: 36, color: COLORS.white, bold: true });
   cover.addText(analysis.file_name, { x: 1, y: 4.0, w: 10, fontSize: 18, color: COLORS.gray400 });
   cover.addText(new Date(analysis.created_at).toLocaleDateString(language, { year: "numeric", month: "long", day: "numeric" }), {
@@ -188,5 +188,5 @@ export function exportAnalysisPptx(analysis: AnalysisData, language: string) {
     });
   }
 
-  pptx.writeFile({ fileName: `Datavision_Report_${analysis.file_name.replace(/\.[^.]+$/, "")}.pptx` });
+  pptx.writeFile({ fileName: `DataVision_Report_${analysis.file_name.replace(/\.[^.]+$/, "")}.pptx` });
 }

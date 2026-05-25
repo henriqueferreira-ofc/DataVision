@@ -174,9 +174,9 @@ export function exportAnalysisPdf(analysis: AnalysisData, language: string) {
     doc.rect(0, 282, pageWidth, 15, "F");
     doc.setTextColor(148, 163, 184);
     doc.setFontSize(8);
-    doc.text(`Datavision Pro  •  ${isPt ? "Página" : "Page"} ${i}/${pages}`, margin, 289);
+    doc.text(`DataVision  •  ${isPt ? "Página" : "Page"} ${i}/${pages}`, margin, 289);
     doc.text(new Date().toLocaleDateString(language), pageWidth - margin - 20, 289);
   }
 
-  doc.save(`Datavision_Report_${analysis.file_name.replace(/\.[^.]+$/, "")}.pdf`);
+  doc.save(`DataVision_Report_${analysis.file_name.replace(/\.[^.]+$/, "")}.pdf`);
 }

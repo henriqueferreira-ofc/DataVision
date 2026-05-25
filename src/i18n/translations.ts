@@ -20,7 +20,7 @@ const translationsData = {
     },
     features: {
       title: "Everything you need to master your data",
-      subtitle: "From raw files to boardroom-ready insights, Datavision Pro handles it all.",
+      subtitle: "From raw files to boardroom-ready insights, DataVision handles it all.",
       upload: {
         title: "Smart Upload",
         description: "Drop Excel, CSV, PDF or PowerPoint files. Our AI auto-detects structure and begins analysis immediately.",
@@ -152,7 +152,7 @@ const translationsData = {
     },
     features: {
       title: "Tudo que você precisa para dominar seus dados",
-      subtitle: "De arquivos brutos a insights prontos para apresentação, o Datavision Pro cuida de tudo.",
+      subtitle: "De arquivos brutos a insights prontos para apresentação, o DataVision cuida de tudo.",
       upload: {
         title: "Upload Inteligente",
         description: "Envie Excel, CSV, PDF ou PowerPoint. Nossa IA detecta a estrutura automaticamente e inicia a análise.",

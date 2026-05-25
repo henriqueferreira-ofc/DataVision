@@ -38,7 +38,7 @@ export function DashboardSidebar() {
           </div>
           {!collapsed && (
             <div className="flex items-center gap-2">
-              <span className="text-lg font-bold tracking-tight">Datavision</span>
+              <span className="text-lg font-bold tracking-tight">DataVision</span>
               {plan !== "free" && (
                 <Badge variant="outline" className="text-[10px] px-1.5 py-0">
                   {plan === "pro" ? "PRO" : "BASIC"}

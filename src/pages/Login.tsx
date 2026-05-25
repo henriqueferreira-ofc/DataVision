@@ -36,7 +36,7 @@ export default function Login() {
           <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary">
             <BarChart3 className="h-8 w-8 text-primary-foreground" />
           </div>
-          <h2 className="text-2xl font-bold">Datavision Pro</h2>
+          <h2 className="text-2xl font-bold">DataVision</h2>
           <p className="mt-3 text-muted-foreground">{t.hero.subtitle}</p>
         </div>
       </div>

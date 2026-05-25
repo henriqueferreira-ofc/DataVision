@@ -51,7 +51,7 @@ function exportAnalysisReport(analysis: any, language: string) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `Datavision_Report_${analysis.file_name.replace(/\.[^.]+$/, "")}.txt`;
+  a.download = `DataVision_Report_${analysis.file_name.replace(/\.[^.]+$/, "")}.txt`;
   a.click();
   URL.revokeObjectURL(url);
 }
