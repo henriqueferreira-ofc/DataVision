@@ -1,60 +1,25 @@
 import { Link } from "react-router-dom";
-import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Zap, TrendingUp, BarChart3, Sparkles, Activity } from "lucide-react";
 
 export function HeroSection() {
   const { t } = useLanguage();
-  const tiltRef = useRef<HTMLDivElement>(null);
-  const [tick, setTick] = useState(0);
-
-  // Live values rotation
-  useEffect(() => {
-    const id = setInterval(() => setTick((v) => v + 1), 2600);
-    return () => clearInterval(id);
-  }, []);
-
-  // Mouse parallax tilt
-  const handleMove = (e: React.MouseEvent) => {
-    const el = tiltRef.current;
-    if (!el) return;
-    const r = el.getBoundingClientRect();
-    const px = (e.clientX - r.left) / r.width - 0.5;
-    const py = (e.clientY - r.top) / r.height - 0.5;
-    el.style.setProperty("--rx", `${(-py * 6).toFixed(2)}deg`);
-    el.style.setProperty("--ry", `${(px * 8).toFixed(2)}deg`);
-  };
-  const handleLeave = () => {
-    const el = tiltRef.current;
-    if (!el) return;
-    el.style.setProperty("--rx", "0deg");
-    el.style.setProperty("--ry", "0deg");
-  };
-
-  const revenueVals = ["R$ 248.5K", "R$ 251.2K", "R$ 256.8K", "R$ 261.4K"];
-  const userVals = ["8,492", "8,517", "8,544", "8,572"];
-  const convVals = ["1,284", "1,291", "1,298", "1,305"];
-  const aovVals = ["R$ 193", "R$ 195", "R$ 198", "R$ 201"];
-
 
   return (
     <section className="relative overflow-hidden pt-32 pb-24 md:pt-40 md:pb-32">
-      {/* Animated background orbs */}
+      {/* Static background orbs */}
       <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute -top-32 left-1/4 h-[520px] w-[520px] rounded-full bg-primary/25 blur-[140px] animate-float-slow" />
-        <div className="absolute top-20 right-1/4 h-[440px] w-[440px] rounded-full bg-accent/20 blur-[140px] animate-float-slower" />
-        <div className="absolute bottom-0 left-1/2 h-[360px] w-[720px] -translate-x-1/2 rounded-full bg-purple-500/15 blur-[140px] animate-float-slow" />
+        <div className="absolute -top-32 left-1/4 h-[520px] w-[520px] rounded-full bg-primary/25 blur-[140px]" />
+        <div className="absolute top-20 right-1/4 h-[440px] w-[440px] rounded-full bg-accent/20 blur-[140px]" />
+        <div className="absolute bottom-0 left-1/2 h-[360px] w-[720px] -translate-x-1/2 rounded-full bg-purple-500/15 blur-[140px]" />
       </div>
       <div className="absolute inset-0 -z-10 bg-grid bg-grid-fade opacity-60" />
 
       <div className="container mx-auto px-4 text-center">
         <div className="animate-fade-up mx-auto max-w-3xl">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm font-medium text-primary backdrop-blur">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-70 animate-pulse-ring" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
-            </span>
+            <span className="inline-flex h-2 w-2 rounded-full bg-primary" />
             <Zap className="h-3.5 w-3.5" />
             {t.hero.badge}
           </div>
@@ -94,17 +59,11 @@ export function HeroSection() {
           ))}
         </div>
 
-        {/* Dashboard preview mockup */}
-        <div className="mx-auto mt-20 max-w-5xl animate-fade-up [perspective:1400px]" style={{ animationDelay: "450ms", opacity: 0 }}>
-          <div
-            ref={tiltRef}
-            onMouseMove={handleMove}
-            onMouseLeave={handleLeave}
-            className="relative animate-tilt-float [transform-style:preserve-3d] transition-transform duration-300 ease-out"
-            style={{ transform: "rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg))" }}
-          >
-            <div className="absolute -inset-4 -z-10 rounded-3xl bg-gradient-to-tr from-primary/30 via-accent/20 to-purple-500/30 blur-2xl animate-gradient-x bg-[length:200%_200%]" />
-            <div className="glass overflow-hidden rounded-2xl shadow-2xl">
+        {/* Dashboard preview mockup — static, with hover interactions only */}
+        <div className="mx-auto mt-20 max-w-5xl animate-fade-up" style={{ animationDelay: "450ms", opacity: 0 }}>
+          <div className="relative group">
+            <div className="absolute -inset-4 -z-10 rounded-3xl bg-gradient-to-tr from-primary/30 via-accent/20 to-purple-500/30 blur-2xl opacity-70 transition-opacity duration-500 group-hover:opacity-100" />
+            <div className="glass overflow-hidden rounded-2xl shadow-2xl transition-transform duration-500 hover:-translate-y-1">
               {/* Window chrome */}
               <div className="relative flex items-center gap-2 border-b border-border/60 bg-muted/40 px-4 py-3">
                 <div className="flex gap-1.5">
@@ -113,29 +72,26 @@ export function HeroSection() {
                   <span className="h-2.5 w-2.5 rounded-full bg-green-400/80" />
                 </div>
                 <div className="mx-auto flex items-center gap-2 rounded-md bg-background/60 px-3 py-1 text-xs text-muted-foreground">
-                  <BarChart3 className="h-3 w-3" /> datavision.app/dashboard
+                  <BarChart3 className="h-3 w-3" /> datavison.app/dashboard
                 </div>
-                <span className="pointer-events-none absolute inset-x-0 -bottom-px h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
               </div>
 
               {/* Mock dashboard */}
               <div className="grid gap-4 p-5 sm:grid-cols-4">
                 {[
-                  { icon: TrendingUp, label: "Revenue", values: revenueVals, delta: "+12.4%", color: "text-emerald-500" },
-                  { icon: Activity, label: "Active Users", values: userVals, delta: "+5.1%", color: "text-primary" },
-                  { icon: Sparkles, label: "Conversions", values: convVals, delta: "+8.7%", color: "text-accent" },
-                  { icon: BarChart3, label: "AOV", values: aovVals, delta: "+2.3%", color: "text-purple-500" },
+                  { icon: TrendingUp, label: "Revenue", value: "R$ 248.5K", delta: "+12.4%", color: "text-emerald-500" },
+                  { icon: Activity, label: "Active Users", value: "8,492", delta: "+5.1%", color: "text-primary" },
+                  { icon: Sparkles, label: "Conversions", value: "1,284", delta: "+8.7%", color: "text-accent" },
+                  { icon: BarChart3, label: "AOV", value: "R$ 193", delta: "+2.3%", color: "text-purple-500" },
                 ].map((k, i) => (
-                  <div key={i} className="group relative overflow-hidden rounded-xl border bg-card/70 p-3 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg">
+                  <div key={i} className="group/card relative overflow-hidden rounded-xl border bg-card/70 p-3 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg">
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{k.label}</span>
-                      <k.icon className={`h-3.5 w-3.5 ${k.color} transition-transform group-hover:scale-110`} />
+                      <k.icon className={`h-3.5 w-3.5 ${k.color} transition-transform group-hover/card:scale-110`} />
                     </div>
-                    <div key={tick} className="mt-1.5 text-lg font-bold tabular-nums animate-count-up">
-                      {k.values[tick % k.values.length]}
-                    </div>
+                    <div className="mt-1.5 text-lg font-bold tabular-nums">{k.value}</div>
                     <div className={`flex items-center gap-1 text-[11px] font-medium ${k.color}`}>
-                      <span className="inline-block h-1 w-1 rounded-full bg-current animate-pulse" />
+                      <span className="inline-block h-1 w-1 rounded-full bg-current" />
                       {k.delta}
                     </div>
                   </div>
@@ -155,12 +111,8 @@ export function HeroSection() {
                     {[40, 65, 50, 78, 60, 92, 70, 88, 55, 95, 72, 84].map((h, i) => (
                       <div
                         key={i}
-                        className="flex-1 origin-bottom rounded-t bg-gradient-to-t from-primary/80 to-accent/80 animate-bar-pulse hover:from-primary hover:to-accent"
-                        style={{
-                          height: `${h}%`,
-                          ["--bar-h" as any]: "1",
-                          animationDelay: `${i * 180}ms`,
-                        } as React.CSSProperties}
+                        className="flex-1 rounded-t bg-gradient-to-t from-primary/80 to-accent/80 transition-all duration-300 hover:from-primary hover:to-accent"
+                        style={{ height: `${h}%` }}
                       />
                     ))}
                   </div>
@@ -172,10 +124,7 @@ export function HeroSection() {
                   <ul className="mt-3 space-y-2.5">
                     {["Growth trending up", "Conversion +18% MoM", "Retention healthy"].map((txt, i) => (
                       <li key={i} className="flex items-start gap-2 text-[11px] text-muted-foreground">
-                        <span className="relative mt-1 flex h-1.5 w-1.5 shrink-0">
-                          <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-70 animate-pulse-ring" />
-                          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-gradient-to-br from-primary to-accent" />
-                        </span>
+                        <span className="mt-1 inline-flex h-1.5 w-1.5 shrink-0 rounded-full bg-gradient-to-br from-primary to-accent" />
                         {txt}
                       </li>
                     ))}
