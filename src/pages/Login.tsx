@@ -31,7 +31,7 @@ export default function Login() {
 
   return (
     <div className="flex min-h-screen">
-      <div className="hidden w-1/2 items-center justify-center bg-primary/5 lg:flex">
+      <div className="auth-left-panel-bg hidden w-1/2 items-center justify-center lg:flex">
         <div className="max-w-md px-8 text-center">
           <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary">
             <BarChart3 className="h-8 w-8 text-primary-foreground" />

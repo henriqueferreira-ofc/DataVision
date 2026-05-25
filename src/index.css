@@ -114,6 +114,15 @@
             mask-image: radial-gradient(ellipse 60% 50% at 50% 40%, #000 40%, transparent 100%);
   }
 
+  .auth-left-panel-bg {
+    background-color: hsl(var(--primary) / 0.05);
+    background-image:
+      linear-gradient(to right, hsl(var(--border) / 0.35) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(var(--border) / 0.35) 1px, transparent 1px),
+      radial-gradient(circle at 85% 8%, hsl(var(--primary) / 0.12), transparent 32%);
+    background-size: 56px 56px, 56px 56px, 100% 100%;
+  }
+
   .text-gradient {
     background: linear-gradient(90deg, hsl(217 91% 60%), hsl(168 72% 43%), hsl(280 80% 65%));
     -webkit-background-clip: text;
