@@ -35,7 +35,7 @@ export function Footer() {
         </div>
 
         <div className="mt-12 border-t pt-6 text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} Datavision Pro. All rights reserved.
+          © {new Date().getFullYear()} DataVison. All rights reserved.
         </div>
       </div>
     </footer>
