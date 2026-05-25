@@ -3,7 +3,8 @@ import { Link } from "react-router-dom";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Button } from "@/components/ui/button";
-import { Menu, X, BarChart3 } from "lucide-react";
+import { Menu, X } from "lucide-react";
+import logo from "@/assets/logo.png";
 
 export function Navbar() {
   const { t } = useLanguage();
@@ -13,10 +14,8 @@ export function Navbar() {
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-lg">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link to="/" className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-            <BarChart3 className="h-4.5 w-4.5 text-primary-foreground" />
-          </div>
-          <span className="text-lg font-bold tracking-tight">Datavision Pro</span>
+          <img src={logo} alt="DataVison logo" className="h-8 w-8 rounded-lg" />
+          <span className="text-lg font-bold tracking-tight">DataVison</span>
         </Link>
 
         <div className="hidden items-center gap-8 md:flex">
