@@ -18,30 +18,36 @@ serve(async (req) => {
   );
 
   try {
-    const authHeader = req.headers.get("Authorization")!;
-    const token = authHeader.replace("Bearer ", "");
-    const { data } = await supabaseClient.auth.getUser(token);
-    const user = data.user;
-    if (!user?.email) throw new Error("User not authenticated");
-
     const { priceId } = await req.json();
     if (!priceId) throw new Error("Missing priceId");
 
-    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", { apiVersion: "2025-08-27.basil" });
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+    // Try to identify the user if logged in (optional — guest checkout supported)
+    let userEmail: string | undefined;
+    const authHeader = req.headers.get("Authorization");
+    if (authHeader) {
+      const token = authHeader.replace("Bearer ", "");
+      const { data } = await supabaseClient.auth.getUser(token);
+      userEmail = data.user?.email ?? undefined;
+    }
+
+    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
+      apiVersion: "2025-08-27.basil",
+    });
+
     let customerId: string | undefined;
-    if (customers.data.length > 0) {
-      customerId = customers.data[0].id;
+    if (userEmail) {
+      const customers = await stripe.customers.list({ email: userEmail, limit: 1 });
+      if (customers.data.length > 0) customerId = customers.data[0].id;
     }
 
     const origin = req.headers.get("origin") || "https://datavision.lovable.app";
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
-      customer_email: customerId ? undefined : user.email,
+      customer_email: customerId ? undefined : userEmail, // undefined for guests → Stripe collects email
       line_items: [{ price: priceId, quantity: 1 }],
       mode: "subscription",
-      success_url: `${origin}/dashboard/settings?checkout=success`,
-      cancel_url: `${origin}/dashboard/settings?checkout=cancel`,
+      success_url: `${origin}/signup?checkout=success&plan=pro`,
+      cancel_url: `${origin}/?checkout=cancel`,
     });
 
     return new Response(JSON.stringify({ url: session.url }), {
