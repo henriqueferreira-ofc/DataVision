@@ -96,36 +96,25 @@ export function PricingSection() {
             <ScrollReveal key={plan.name} delay={i * 100}>
               <div className={cn(
                 "group relative h-full",
-                plan.popular && "cursor-pointer lg:-mt-4"
-              )}
-                onClick={plan.isPro ? handleProCheckout : undefined}
-                onKeyDown={(event) => {
-                  if (!plan.isPro || loadingPro) return;
-                  if (event.key === "Enter" || event.key === " ") {
-                    event.preventDefault();
-                    handleProCheckout();
-                  }
-                }}
-                role={plan.isPro ? "button" : undefined}
-                tabIndex={plan.isPro ? 0 : undefined}
-              >
+                plan.popular && "lg:-mt-4"
+              )}>
                 {plan.popular && (
-                  <div className="absolute -inset-px -z-10 rounded-2xl bg-gradient-to-br from-primary via-accent to-primary bg-[length:200%_200%] opacity-70 blur-md animate-gradient-x" />
+                  <div className="pointer-events-none absolute -inset-px -z-10 rounded-2xl bg-gradient-to-br from-primary via-accent to-primary bg-[length:200%_200%] opacity-70 blur-md animate-gradient-x" />
                 )}
                 {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 z-20 -translate-x-1/2 rounded-full bg-gradient-to-r from-primary to-accent px-4 py-1.5 text-xs font-semibold text-white shadow-lg ring-2 ring-background">
+                  <div className="pointer-events-none absolute -top-4 left-1/2 z-20 -translate-x-1/2 rounded-full bg-gradient-to-r from-primary to-accent px-4 py-1.5 text-xs font-semibold text-white shadow-lg ring-2 ring-background">
                     ★ {t.pricing.popular}
                   </div>
                 )}
               <div className={cn(
                 "relative flex h-full flex-col overflow-hidden rounded-2xl border bg-card/80 p-8 backdrop-blur card-hover transition-transform duration-500 group-hover:-translate-y-1",
-                plan.popular && "cursor-pointer border-primary/40"
+                plan.popular && "border-primary/40"
               )}>
                 {plan.popular && (
                   <>
-                    <div className="absolute -right-20 -top-20 h-48 w-48 rounded-full bg-gradient-to-br from-primary to-accent opacity-20 blur-3xl animate-float-slow" />
-                    <div className="absolute -bottom-24 -left-16 h-48 w-48 rounded-full bg-gradient-to-tr from-accent/30 to-primary/20 blur-3xl animate-float-slow" style={{ animationDelay: '1.5s' }} />
-                    <div className="absolute -top-px left-8 right-8 h-px bg-gradient-to-r from-transparent via-primary to-transparent" />
+                    <div className="pointer-events-none absolute -right-20 -top-20 h-48 w-48 rounded-full bg-gradient-to-br from-primary to-accent opacity-20 blur-3xl animate-float-slow" />
+                    <div className="pointer-events-none absolute -bottom-24 -left-16 h-48 w-48 rounded-full bg-gradient-to-tr from-accent/30 to-primary/20 blur-3xl animate-float-slow" style={{ animationDelay: '1.5s' }} />
+                    <div className="pointer-events-none absolute -top-px left-8 right-8 h-px bg-gradient-to-r from-transparent via-primary to-transparent" />
                   </>
                 )}
                 <div>
@@ -155,12 +144,10 @@ export function PricingSection() {
                 <div className="mt-8">
                   {plan.isPro ? (
                     <Button
-                      className={cn("w-full transition-transform hover:scale-[1.02] active:scale-[0.97] glow-primary")}
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        handleProCheckout();
-                      }}
-                      disabled={loadingPro}
+                      type="button"
+                      className={cn("w-full cursor-pointer transition-transform hover:scale-[1.02] active:scale-[0.97] glow-primary", loadingPro && "opacity-50")}
+                      onClick={handleProCheckout}
+                      aria-disabled={loadingPro}
                     >
                       {loadingPro ? <Loader2 className="h-4 w-4 animate-spin" /> : plan.cta}
                     </Button>
