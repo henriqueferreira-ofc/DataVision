@@ -40,7 +40,7 @@ export default function Login() {
   };
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-svh">
       <div className="auth-left-panel-bg hidden w-1/2 items-center justify-center lg:flex">
         <div className="max-w-md px-8 text-center">
           <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary">
@@ -55,8 +55,8 @@ export default function Login() {
         <div className="flex justify-end p-4">
           <LanguageSwitcher />
         </div>
-        <div className="flex flex-1 items-center justify-center px-8">
-          <div className="w-full max-w-sm">
+        <div className="flex flex-1 items-center justify-center px-4 py-8 sm:px-8">
+          <div className="w-full max-w-sm sm:max-w-md">
             <div className="mb-8">
               <h1 className="text-2xl font-bold">{t.auth.loginTitle}</h1>
               <p className="mt-1 text-muted-foreground">{t.auth.loginSubtitle}</p>

@@ -39,7 +39,7 @@ export default function DashboardHome() {
         <p className="mt-1 text-muted-foreground">{t.dashboard.quickStats}</p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {stats.map((s) => (
           <Card key={s.label}>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -68,7 +68,7 @@ export default function DashboardHome() {
             {recentAnalyses.map((analysis) => (
               <Link key={analysis.id} to={`/dashboard/analyses/${analysis.id}`}>
                 <Card className="transition-shadow hover:shadow-md">
-                  <CardContent className="flex items-center gap-4 py-4">
+                  <CardContent className="flex items-start gap-3 py-4 sm:items-center sm:gap-4">
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
                       <BarChart3 className="h-5 w-5 text-primary" />
                     </div>
@@ -78,7 +78,9 @@ export default function DashboardHome() {
                         {formatDistanceToNow(new Date(analysis.created_at), { addSuffix: true, locale })}
                       </p>
                     </div>
-                    <StatusBadge status={analysis.status} language={language} />
+                    <div className="shrink-0">
+                      <StatusBadge status={analysis.status} language={language} />
+                    </div>
                   </CardContent>
                 </Card>
               </Link>

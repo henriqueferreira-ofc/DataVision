@@ -50,9 +50,9 @@ export default function AnalysesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold">{t.dashboard.analyses}</h1>
-        <Button size="sm" asChild className="gap-1.5 active:scale-[0.97]">
+        <Button size="sm" asChild className="w-full gap-1.5 active:scale-[0.97] sm:w-auto">
           <Link to="/dashboard/upload">
             {language === "pt-BR" ? "Nova Análise" : "New Analysis"}
             <ArrowRight className="h-3.5 w-3.5" />
@@ -66,7 +66,7 @@ export default function AnalysesPage() {
           return (
             <Link key={analysis.id} to={`/dashboard/analyses/${analysis.id}`}>
               <Card className="transition-shadow hover:shadow-md">
-                <CardContent className="flex items-center gap-4 py-4">
+                <CardContent className="flex items-start gap-3 py-4 sm:items-center sm:gap-4">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
                     <Icon className="h-5 w-5 text-primary" />
                   </div>
@@ -76,7 +76,9 @@ export default function AnalysesPage() {
                       {formatDistanceToNow(new Date(analysis.created_at), { addSuffix: true, locale })}
                     </p>
                   </div>
-                  <StatusBadge status={analysis.status} language={language} />
+                  <div className="shrink-0">
+                    <StatusBadge status={analysis.status} language={language} />
+                  </div>
                 </CardContent>
               </Card>
             </Link>

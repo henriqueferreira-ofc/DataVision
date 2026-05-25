@@ -16,7 +16,7 @@ function exportAnalysisReport(analysis: any, language: string) {
   const recs = analysis.recommendations as any;
   const kpis = analysis.kpis as any[];
 
-  let content = `DATAVISION PRO - ${language === "pt-BR" ? "RELATÓRIO EXECUTIVO" : "EXECUTIVE REPORT"}\n`;
+  let content = `DATAVISION - ${language === "pt-BR" ? "RELATÓRIO EXECUTIVO" : "EXECUTIVE REPORT"}\n`;
   content += `${"=".repeat(60)}\n`;
   content += `${language === "pt-BR" ? "Arquivo" : "File"}: ${analysis.file_name}\n`;
   content += `${language === "pt-BR" ? "Data" : "Date"}: ${new Date(analysis.created_at).toLocaleDateString(language)}\n\n`;
@@ -90,7 +90,7 @@ export default function ReportsPage() {
         <div className="space-y-3">
           {completedAnalyses.map((analysis) => (
             <Card key={analysis.id} className="transition-shadow hover:shadow-md">
-              <CardContent className="flex items-center gap-4 py-4">
+              <CardContent className="flex flex-col gap-4 py-4 sm:flex-row sm:items-center">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
                   <BarChart3 className="h-5 w-5 text-primary" />
                 </div>
@@ -100,7 +100,7 @@ export default function ReportsPage() {
                     {formatDistanceToNow(new Date(analysis.created_at), { addSuffix: true, locale })}
                   </p>
                 </div>
-                <div className="flex gap-2 shrink-0">
+                <div className="grid w-full shrink-0 grid-cols-2 gap-2 sm:flex sm:w-auto">
                   <Button
                     variant="outline"
                     size="sm"

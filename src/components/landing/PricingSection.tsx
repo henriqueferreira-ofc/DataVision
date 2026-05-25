@@ -68,9 +68,9 @@ export function PricingSection() {
   ];
 
   return (
-    <section id="pricing" className="relative overflow-hidden py-24 md:py-32">
+    <section id="pricing" className="relative overflow-hidden py-16 sm:py-24 md:py-32">
       <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-transparent via-muted/30 to-transparent" />
-      <div className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-[120px]" />
+      <div className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-[100px] sm:h-[500px] sm:w-[500px] sm:blur-[120px]" />
 
       <div className="container mx-auto px-4">
         <ScrollReveal className="mx-auto max-w-2xl text-center">
@@ -91,7 +91,7 @@ export function PricingSection() {
           </div>
         </ScrollReveal>
 
-        <div className="mx-auto mt-12 grid max-w-4xl gap-6 lg:grid-cols-2">
+        <div className="mx-auto mt-10 grid max-w-4xl gap-6 sm:mt-12 lg:grid-cols-2">
           {plans.map((plan, i) => (
             <ScrollReveal key={plan.name} delay={i * 100}>
               <div className={cn(
@@ -107,7 +107,7 @@ export function PricingSection() {
                   </div>
                 )}
               <div className={cn(
-                "relative flex h-full flex-col overflow-hidden rounded-2xl border bg-card/80 p-8 backdrop-blur card-hover transition-transform duration-500 group-hover:-translate-y-1",
+                "relative flex h-full flex-col overflow-hidden rounded-2xl border bg-card/80 p-6 backdrop-blur card-hover transition-transform duration-500 group-hover:-translate-y-1 sm:p-8",
                 plan.popular && "border-primary/40"
               )}>
                 {plan.popular && (
@@ -122,7 +122,7 @@ export function PricingSection() {
                   <p className="mt-1 text-sm text-muted-foreground">{plan.description}</p>
                 </div>
                 <div className="mt-6 flex items-baseline gap-1">
-                  <span className={cn("text-5xl font-extrabold tabular-nums", plan.popular && "text-gradient")}>{plan.price}</span>
+                  <span className={cn("text-4xl font-extrabold tabular-nums sm:text-5xl", plan.popular && "text-gradient")}>{plan.price}</span>
                   {plan.period && <span className="text-muted-foreground">{plan.period}</span>}
                 </div>
                 <ul className="mt-8 flex-1 space-y-3">

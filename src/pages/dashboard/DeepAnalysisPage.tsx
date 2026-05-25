@@ -107,18 +107,18 @@ export default function DeepAnalysisPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex min-w-0 items-start gap-3">
           <Button variant="ghost" size="icon" asChild><Link to={`/dashboard/analyses/${id}`}><ArrowLeft className="h-4 w-4" /></Link></Button>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold">{pt ? "Análise Profunda" : "Deep Analysis"}</h1>
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="text-xl font-bold sm:text-2xl">{pt ? "Análise Profunda" : "Deep Analysis"}</h1>
               <Badge className="bg-yellow-500/10 text-yellow-600 border-yellow-500/30"><Crown className="h-3 w-3 mr-1" />PRO</Badge>
             </div>
-            <p className="text-sm text-muted-foreground">{analysis.file_name}</p>
+            <p className="truncate text-sm text-muted-foreground">{analysis.file_name}</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:items-center">
           <Button variant="outline" size="sm" className="gap-2" onClick={() => exportDeepAnalysisPdf(analysis as any, language)}>
             <FileText className="h-4 w-4" /> PDF
           </Button>
@@ -140,7 +140,7 @@ export default function DeepAnalysisPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center gap-6">
+                <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:gap-6">
                   <ScoreRing score={executiveScore.overall || 0} />
                   <div className="flex-1 space-y-3">
                     {executiveScore.categories?.map((cat: any, i: number) => (
@@ -170,7 +170,7 @@ export default function DeepAnalysisPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center gap-6">
+                <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:gap-6">
                   <ScoreRing score={dataQuality.score || 0} size={100} />
                   <div className="flex-1 space-y-3">
                     {[

@@ -195,12 +195,12 @@ export default function UploadPage() {
           input.click();
         }}
       >
-        <CardContent className="flex flex-col items-center justify-center py-16">
+        <CardContent className="flex flex-col items-center justify-center px-4 py-12 text-center sm:py-16">
           <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
             <Upload className="h-6 w-6 text-primary" />
           </div>
-          <p className="text-lg font-medium">{t.dashboard.uploadSubtitle}</p>
-          <p className="mt-1 text-sm text-muted-foreground">{t.dashboard.uploadFormats}</p>
+          <p className="text-base font-medium sm:text-lg">{t.dashboard.uploadSubtitle}</p>
+          <p className="mt-1 max-w-sm text-sm text-muted-foreground">{t.dashboard.uploadFormats}</p>
         </CardContent>
       </Card>
 
@@ -212,7 +212,7 @@ export default function UploadPage() {
             const isDone = uploading && uploadingIndex > i;
             return (
               <Card key={i}>
-                <CardContent className="flex items-center gap-4 py-4">
+                <CardContent className="flex items-center gap-3 py-4 sm:gap-4">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
                     <Icon className="h-5 w-5 text-primary" />
                   </div>

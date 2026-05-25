@@ -94,16 +94,16 @@ export default function AnalysisDetailPage() {
     <div className="space-y-6">
       <UpgradeModal open={showUpgrade} onOpenChange={setShowUpgrade} feature={pt ? "Exportação de Relatórios" : "Report Export"} />
 
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3 min-w-0">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex min-w-0 items-center gap-3">
           <Button variant="ghost" size="icon" asChild className="shrink-0"><Link to="/dashboard/analyses"><ArrowLeft className="h-4 w-4" /></Link></Button>
           <div className="min-w-0">
-            <h1 className="truncate text-2xl font-bold">{analysis.file_name}</h1>
+            <h1 className="truncate text-xl font-bold sm:text-2xl">{analysis.file_name}</h1>
             <p className="text-sm text-muted-foreground">{new Date(analysis.created_at).toLocaleDateString(language, { year: "numeric", month: "long", day: "numeric" })}</p>
           </div>
         </div>
         {analysis.status === "completed" && (
-          <div className="flex gap-2 shrink-0">
+          <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:shrink-0">
             <Button variant="outline" size="sm" className="gap-1.5" onClick={handleExportPDF}>
               {!userIsPro && <Lock className="h-3 w-3" />}<FileText className="h-3.5 w-3.5" /> PDF
             </Button>
@@ -111,12 +111,12 @@ export default function AnalysisDetailPage() {
               {!userIsPro && <Lock className="h-3 w-3" />}<Presentation className="h-3.5 w-3.5" /> PPTX
             </Button>
             {userIsPro && (
-              <Button size="sm" className="gap-1.5" asChild>
+              <Button size="sm" className="col-span-2 gap-1.5 sm:col-span-1" asChild>
                 <Link to={`/dashboard/analyses/${id}/deep`}><Microscope className="h-3.5 w-3.5" />{pt ? "Análise Profunda" : "Deep Analysis"}</Link>
               </Button>
             )}
             {!userIsPro && (
-              <Button size="sm" variant="outline" className="gap-1.5 border-yellow-500/30 text-yellow-600 hover:bg-yellow-500/10" onClick={() => setShowUpgrade(true)}>
+              <Button size="sm" variant="outline" className="col-span-2 gap-1.5 border-yellow-500/30 text-yellow-600 hover:bg-yellow-500/10 sm:col-span-1" onClick={() => setShowUpgrade(true)}>
                 <Crown className="h-3.5 w-3.5" />{pt ? "Análise Profunda" : "Deep Analysis"}
               </Button>
             )}
@@ -158,11 +158,11 @@ export default function AnalysisDetailPage() {
           )}
 
           <Tabs defaultValue="diagnosis" className="space-y-4">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="diagnosis" className="gap-1.5 text-xs sm:text-sm"><Stethoscope className="h-3.5 w-3.5 hidden sm:block" />{t.dashboard.diagnosis}</TabsTrigger>
-              <TabsTrigger value="insights" className="gap-1.5 text-xs sm:text-sm"><Lightbulb className="h-3.5 w-3.5 hidden sm:block" />{t.dashboard.insights}</TabsTrigger>
-              <TabsTrigger value="actionPlan" className="gap-1.5 text-xs sm:text-sm"><Target className="h-3.5 w-3.5 hidden sm:block" />{t.dashboard.actionPlan}</TabsTrigger>
-              <TabsTrigger value="recommendations" className="gap-1.5 text-xs sm:text-sm"><Star className="h-3.5 w-3.5 hidden sm:block" />{t.dashboard.recommendations}</TabsTrigger>
+            <TabsList className="grid h-auto w-full grid-cols-2 gap-1 p-1 sm:grid-cols-4">
+              <TabsTrigger value="diagnosis" className="min-h-9 gap-1.5 whitespace-normal px-2 text-xs sm:text-sm"><Stethoscope className="hidden h-3.5 w-3.5 sm:block" />{t.dashboard.diagnosis}</TabsTrigger>
+              <TabsTrigger value="insights" className="min-h-9 gap-1.5 whitespace-normal px-2 text-xs sm:text-sm"><Lightbulb className="hidden h-3.5 w-3.5 sm:block" />{t.dashboard.insights}</TabsTrigger>
+              <TabsTrigger value="actionPlan" className="min-h-9 gap-1.5 whitespace-normal px-2 text-xs sm:text-sm"><Target className="hidden h-3.5 w-3.5 sm:block" />{t.dashboard.actionPlan}</TabsTrigger>
+              <TabsTrigger value="recommendations" className="min-h-9 gap-1.5 whitespace-normal px-2 text-xs sm:text-sm"><Star className="hidden h-3.5 w-3.5 sm:block" />{t.dashboard.recommendations}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="diagnosis">
