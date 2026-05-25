@@ -1,5 +1,5 @@
 import { useLanguage } from "@/i18n/LanguageContext";
-import { BarChart3 } from "lucide-react";
+import logo from "@/assets/logo.png";
 
 export function Footer() {
   const { t } = useLanguage();
@@ -10,10 +10,8 @@ export function Footer() {
         <div className="grid gap-8 md:grid-cols-4">
           <div className="md:col-span-1">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-                <BarChart3 className="h-4 w-4 text-primary-foreground" />
-              </div>
-              <span className="text-lg font-bold">Datavision Pro</span>
+              <img src={logo} alt="DataVison logo" className="h-8 w-8 rounded-lg" />
+              <span className="text-lg font-bold">DataVison</span>
             </div>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{t.footer.description}</p>
           </div>
@@ -37,7 +35,7 @@ export function Footer() {
         </div>
 
         <div className="mt-12 border-t pt-6 text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} Datavision Pro. All rights reserved.
+          © {new Date().getFullYear()} DataVison. All rights reserved.
         </div>
       </div>
     </footer>
