@@ -18,8 +18,8 @@ serve(async (req) => {
   );
 
   try {
-    const { priceId } = await req.json();
-    if (!priceId) throw new Error("Missing priceId");
+    const { priceId, productId } = await req.json();
+    if (!priceId && !productId) throw new Error("Missing priceId or productId");
 
     // Try to identify the user if logged in (optional — guest checkout supported)
     let userEmail: string | undefined;
@@ -40,11 +40,18 @@ serve(async (req) => {
       if (customers.data.length > 0) customerId = customers.data[0].id;
     }
 
+    let resolvedPriceId = priceId;
+    if (productId) {
+      const prices = await stripe.prices.list({ product: productId, active: true, limit: 1 });
+      if (prices.data.length === 0) throw new Error(`No active price found for product ${productId}`);
+      resolvedPriceId = prices.data[0].id;
+    }
+
     const origin = req.headers.get("origin") || "https://datavision.lovable.app";
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : userEmail, // undefined for guests → Stripe collects email
-      line_items: [{ price: priceId, quantity: 1 }],
+      line_items: [{ price: resolvedPriceId, quantity: 1 }],
       mode: "subscription",
       success_url: `${origin}/signup?checkout=success&plan=pro`,
       cancel_url: `${origin}/?checkout=cancel`,

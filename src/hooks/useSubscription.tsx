@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, createContext, useContext } from "rea
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 
-export type PlanType = "free" | "basic" | "pro";
+export type PlanType = "free" | "pro";
 
 interface SubscriptionState {
   plan: PlanType;
@@ -22,15 +22,9 @@ const SubscriptionContext = createContext<SubscriptionState>({
 
 // Stripe price/product mapping
 export const PLANS = {
-  basic: {
-    monthly: { priceId: "price_1TDP7PJWceWgSe2VBNywAzSR", productId: "prod_UBmgETBLICbzxM" },
-    yearly: { priceId: "price_1TDP7qJWceWgSe2VjMAjlCtP", productId: "prod_UBmhkRTvb5KgWP" },
-    monthlyPrice: "R$9,90",
-    yearlyPrice: "R$49,90",
-  },
   pro: {
-    monthly: { priceId: "price_1TDP8zJWceWgSe2V2RrNTlbK", productId: "prod_UBmiH7QE3gQkMV" },
-    yearly: { priceId: "price_1TDPAzJWceWgSe2V9kh7wZgL", productId: "prod_UBmk2vWMVHeWfa" },
+    monthly: { productId: "prod_Ua8LG0xWmDd5aq" },
+    yearly: { productId: "prod_Ua8MmVa1mC4Ioh" },
     monthlyPrice: "R$19,90",
     yearlyPrice: "R$99,90",
   },
@@ -38,10 +32,6 @@ export const PLANS = {
 
 export function isPro(plan: PlanType): boolean {
   return plan === "pro";
-}
-
-export function isBasicOrHigher(plan: PlanType): boolean {
-  return plan === "basic" || plan === "pro";
 }
 
 export function SubscriptionProvider({ children }: { children: React.ReactNode }) {

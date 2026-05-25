@@ -22,9 +22,9 @@ export function PricingSection() {
   const handleProCheckout = async () => {
     setLoadingPro(true);
     try {
-      const priceId = yearly ? PLANS.pro.yearly.priceId : PLANS.pro.monthly.priceId;
+      const productId = yearly ? PLANS.pro.yearly.productId : PLANS.pro.monthly.productId;
       const { data, error } = await supabase.functions.invoke("create-checkout", {
-        body: { priceId },
+        body: { productId },
       });
       if (error) throw error;
       if (data?.url) {
@@ -39,8 +39,8 @@ export function PricingSection() {
 
   const plans = [
     {
-      name: pt ? "Básico" : "Basic",
-      price: "Free",
+      name: pt ? "Gratuito" : "Free",
+      price: pt ? "Grátis" : "Free",
       period: "",
       description: pt ? "Comece agora sem pagar nada" : "Get started for free",
       features: [

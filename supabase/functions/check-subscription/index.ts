@@ -65,8 +65,8 @@ serve(async (req) => {
     }
 
     // Map product IDs to plan names
-    const PRO_PRODUCTS = ["prod_UBmiH7QE3gQkMV", "prod_UBmk2vWMVHeWfa"];
-    const plan = PRO_PRODUCTS.includes(productId as string) ? "pro" : "basic";
+    const PRO_PRODUCTS = ["prod_Ua8LG0xWmDd5aq", "prod_Ua8MmVa1mC4Ioh"];
+    const plan = PRO_PRODUCTS.includes(productId as string) ? "pro" : "free";
 
     return new Response(JSON.stringify({
       subscribed: true,

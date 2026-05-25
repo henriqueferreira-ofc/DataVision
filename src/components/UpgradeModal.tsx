@@ -22,13 +22,13 @@ export function UpgradeModal({ open, onOpenChange, feature }: UpgradeModalProps)
   const [yearly, setYearly] = useState(false);
   const pt = language === "pt-BR";
 
-  const handleCheckout = async (plan: "basic" | "pro") => {
+  const handleCheckout = async () => {
     const billing = yearly ? "yearly" : "monthly";
-    const priceId = PLANS[plan][billing].priceId;
-    setLoading(`${plan}-${billing}`);
+    const productId = PLANS.pro[billing].productId;
+    setLoading(`pro-${billing}`);
     try {
       const { data, error } = await supabase.functions.invoke("create-checkout", {
-        body: { priceId },
+        body: { productId },
       });
       if (error) throw error;
       if (data?.url) window.open(data.url, "_blank");
@@ -74,31 +74,31 @@ export function UpgradeModal({ open, onOpenChange, feature }: UpgradeModalProps)
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2">
-          {/* Basic */}
-          <div className="rounded-lg border p-4 space-y-3">
-            <h3 className="font-bold">Básico</h3>
-            <p className="text-2xl font-extrabold">{yearly ? PLANS.basic.yearlyPrice : PLANS.basic.monthlyPrice}<span className="text-sm font-normal text-muted-foreground">/{yearly ? (pt ? "ano" : "yr") : (pt ? "mês" : "mo")}</span></p>
+          {/* Free / Basic (Gratuito) */}
+          <div className="rounded-lg border p-4 space-y-3 bg-muted/30">
+            <h3 className="font-bold text-muted-foreground">{pt ? "Plano Gratuito" : "Free Plan"}</h3>
+            <p className="text-2xl font-extrabold text-muted-foreground">{pt ? "Grátis" : "Free"}</p>
             <ul className="space-y-1.5">
               {basicFeatures.map(f => (
                 <li key={f} className="flex items-start gap-2 text-xs text-muted-foreground"><Check className="h-3 w-3 mt-0.5 text-primary shrink-0" />{f}</li>
               ))}
             </ul>
-            <Button variant="outline" size="sm" className="w-full" disabled={!!loading} onClick={() => handleCheckout("basic")}>
-              {loading?.startsWith("basic") ? <Loader2 className="h-4 w-4 animate-spin" /> : (pt ? "Assinar Básico" : "Subscribe Basic")}
+            <Button variant="outline" size="sm" className="w-full" disabled>
+              {pt ? "Seu Plano Atual" : "Your Current Plan"}
             </Button>
           </div>
 
           {/* Pro */}
-          <div className="rounded-lg border border-primary p-4 space-y-3 relative">
-            <Badge className="absolute -top-2.5 right-3 text-[10px]">{pt ? "Recomendado" : "Recommended"}</Badge>
-            <h3 className="font-bold flex items-center gap-1.5">Pro <Crown className="h-3.5 w-3.5 text-yellow-500" /></h3>
+          <div className="rounded-lg border border-primary p-4 space-y-3 relative bg-card shadow-sm">
+            <Badge className="absolute -top-2.5 right-3 text-[10px] bg-gradient-to-r from-primary to-accent">{pt ? "Recomendado" : "Recommended"}</Badge>
+            <h3 className="font-bold flex items-center gap-1.5 text-foreground">Pro <Crown className="h-3.5 w-3.5 text-yellow-500" /></h3>
             <p className="text-2xl font-extrabold">{yearly ? PLANS.pro.yearlyPrice : PLANS.pro.monthlyPrice}<span className="text-sm font-normal text-muted-foreground">/{yearly ? (pt ? "ano" : "yr") : (pt ? "mês" : "mo")}</span></p>
             <ul className="space-y-1.5">
               {proFeatures.map(f => (
                 <li key={f} className="flex items-start gap-2 text-xs text-muted-foreground"><Check className="h-3 w-3 mt-0.5 text-yellow-500 shrink-0" />{f}</li>
               ))}
             </ul>
-            <Button size="sm" className="w-full" disabled={!!loading} onClick={() => handleCheckout("pro")}>
+            <Button size="sm" className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 border-0" disabled={!!loading} onClick={handleCheckout}>
               {loading?.startsWith("pro") ? <Loader2 className="h-4 w-4 animate-spin" /> : (pt ? "Assinar Pro" : "Subscribe Pro")}
             </Button>
           </div>
