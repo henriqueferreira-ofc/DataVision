@@ -22,9 +22,9 @@ export function PricingSection() {
   const handleProCheckout = async () => {
     setLoadingPro(true);
     try {
-      const productId = yearly ? PLANS.pro.yearly.productId : PLANS.pro.monthly.productId;
+      const priceId = yearly ? PLANS.pro.yearly.priceId : PLANS.pro.monthly.priceId;
       const { data, error } = await supabase.functions.invoke("create-checkout", {
-        body: { productId },
+        body: { priceId },
       });
       if (error) throw error;
       if (data?.url) {

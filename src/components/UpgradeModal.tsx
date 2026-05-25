@@ -24,11 +24,11 @@ export function UpgradeModal({ open, onOpenChange, feature }: UpgradeModalProps)
 
   const handleCheckout = async () => {
     const billing = yearly ? "yearly" : "monthly";
-    const productId = PLANS.pro[billing].productId;
+    const priceId = PLANS.pro[billing].priceId;
     setLoading(`pro-${billing}`);
     try {
       const { data, error } = await supabase.functions.invoke("create-checkout", {
-        body: { productId },
+        body: { priceId },
       });
       if (error) throw error;
       if (data?.url) window.open(data.url, "_blank");

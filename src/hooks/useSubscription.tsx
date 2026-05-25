@@ -23,8 +23,8 @@ const SubscriptionContext = createContext<SubscriptionState>({
 // Stripe price/product mapping
 export const PLANS = {
   pro: {
-    monthly: { productId: "prod_Ua8LG0xWmDd5aq" },
-    yearly: { productId: "prod_Ua8MmVa1mC4Ioh" },
+    monthly: { priceId: "price_1Tay5CR1cXe9FbKjahMnQqhB", productId: "prod_Ua8LG0xWmDd5aq" },
+    yearly: { priceId: "price_1Tay5nR1cXe9FbKjQlAOsrGl", productId: "prod_Ua8MmVa1mC4Ioh" },
     monthlyPrice: "R$19,90",
     yearlyPrice: "R$99,90",
   },
