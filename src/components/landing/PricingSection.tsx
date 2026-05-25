@@ -20,10 +20,6 @@ export function PricingSection() {
   const pt = language === "pt-BR";
 
   const handleProCheckout = async () => {
-    if (!user) {
-      navigate(`/signup?plan=pro&billing=${yearly ? "yearly" : "monthly"}`);
-      return;
-    }
     setLoadingPro(true);
     try {
       const priceId = yearly ? PLANS.pro.yearly.priceId : PLANS.pro.monthly.priceId;
@@ -31,7 +27,9 @@ export function PricingSection() {
         body: { priceId },
       });
       if (error) throw error;
-      if (data?.url) window.open(data.url, "_blank");
+      if (data?.url) {
+        window.location.href = data.url;
+      }
     } catch (err: any) {
       toast({ variant: "destructive", title: "Erro", description: err.message });
     } finally {
