@@ -119,8 +119,11 @@
     background-image:
       linear-gradient(to right, hsl(var(--border) / 0.35) 1px, transparent 1px),
       linear-gradient(to bottom, hsl(var(--border) / 0.35) 1px, transparent 1px),
-      radial-gradient(circle at 85% 8%, hsl(var(--primary) / 0.12), transparent 32%);
-    background-size: 56px 56px, 56px 56px, 100% 100%;
+      radial-gradient(circle at 38% 8%, hsl(var(--primary) / 0.22), transparent 34%),
+      radial-gradient(circle at 64% 16%, hsl(var(--accent) / 0.18), transparent 34%),
+      radial-gradient(circle at 78% 82%, hsl(280 80% 65% / 0.13), transparent 30%),
+      linear-gradient(180deg, hsl(var(--primary) / 0.06), hsl(var(--background)));
+    background-size: 56px 56px, 56px 56px, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
   }
 
   .text-gradient {
