@@ -8,8 +8,8 @@ const corsHeaders = {
 };
 
 const PRO_PRICES = {
-  monthly: { amount: 1990, interval: "month" },
-  yearly: { amount: 9990, interval: "year" },
+  monthly: "price_1Tay5CR1cXe9FbKjahMnQqhB",
+  yearly: "price_1Tay5nR1cXe9FbKjQlAOsrGl",
 } as const;
 
 serve(async (req) => {
@@ -28,7 +28,7 @@ serve(async (req) => {
         status: 400,
       });
     }
-    const selectedPrice = PRO_PRICES[billingCycle];
+    const selectedPriceId = PRO_PRICES[billingCycle];
 
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
@@ -59,18 +59,7 @@ serve(async (req) => {
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : userEmail,
-      line_items: [{
-        price_data: {
-          currency: "brl",
-          product_data: {
-            name: "DataVision Pro",
-            metadata: { plan: "pro" },
-          },
-          recurring: { interval: selectedPrice.interval },
-          unit_amount: selectedPrice.amount,
-        },
-        quantity: 1,
-      }],
+      line_items: [{ price: selectedPriceId, quantity: 1 }],
       mode: "subscription",
       subscription_data: {
         metadata: { plan: "pro", billing_cycle: billingCycle },
