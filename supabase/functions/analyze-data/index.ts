@@ -53,6 +53,29 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
+    // Determine plan via Stripe (server-side, not client trusted)
+    let userIsPro = false;
+    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+    if (stripeKey && user.email) {
+      try {
+        const stripeRes = await fetch("https://api.stripe.com/v1/customers?" + new URLSearchParams({ email: user.email, limit: "1" }), {
+          headers: { Authorization: `Bearer ${stripeKey}` },
+        });
+        const customers = await stripeRes.json();
+        const cid = customers?.data?.[0]?.id;
+        if (cid) {
+          const subRes = await fetch("https://api.stripe.com/v1/subscriptions?" + new URLSearchParams({ customer: cid, status: "active", limit: "1" }), {
+            headers: { Authorization: `Bearer ${stripeKey}` },
+          });
+          const subs = await subRes.json();
+          userIsPro = Array.isArray(subs?.data) && subs.data.length > 0;
+        }
+      } catch (e) {
+        logStep("Plan check failed, defaulting to free", { err: String(e) });
+      }
+    }
+    logStep("Plan determined", { userIsPro });
+
     await supabase.from("analyses").update({ status: "processing" }).eq("id", analysisId);
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
@@ -239,14 +262,17 @@ ${dataContent}`;
       charts,
     };
 
-    // Store new fields inside diagnosis JSON (to avoid schema migration)
-    const enrichedDiagnosis = {
-      ...safeAnalysis.diagnosis,
-      swot: safeAnalysis.swot,
-      executiveScore: safeAnalysis.executiveScore,
-      correlations: safeAnalysis.correlations,
-      dataQuality: safeAnalysis.dataQuality,
-    };
+    // Enforce plan-based gating on stored content
+    const finalCharts = userIsPro ? safeAnalysis.charts : safeAnalysis.charts.slice(0, 2);
+    const enrichedDiagnosis = userIsPro
+      ? {
+          ...safeAnalysis.diagnosis,
+          swot: safeAnalysis.swot,
+          executiveScore: safeAnalysis.executiveScore,
+          correlations: safeAnalysis.correlations,
+          dataQuality: safeAnalysis.dataQuality,
+        }
+      : safeAnalysis.diagnosis;
 
     const { error: updateError } = await supabase.from("analyses").update({
       status: "completed",
@@ -255,7 +281,7 @@ ${dataContent}`;
       action_plan: safeAnalysis.actionPlan,
       recommendations: safeAnalysis.recommendations,
       kpis: safeAnalysis.kpis,
-      charts_data: safeAnalysis.charts,
+      charts_data: finalCharts,
     }).eq("id", analysisId);
 
     if (updateError) {
