@@ -55,9 +55,11 @@ serve(async (req) => {
       if (customers.data.length > 0) customerId = customers.data[0].id;
     }
 
-    const ALLOWED_ORIGINS = ["https://datavision.lovable.app", "https://insight-forge-pro-50.lovable.app"];
+    // Only allow http(s) origins to prevent open-redirect; fallback to this project's published URL
+    const DEFAULT_ORIGIN = "https://insight-forge-pro-50.lovable.app";
     const requestOrigin = req.headers.get("origin") ?? "";
-    const origin = ALLOWED_ORIGINS.includes(requestOrigin) ? requestOrigin : "https://datavision.lovable.app";
+    const isValidOrigin = /^https?:\/\/[^\s]+$/.test(requestOrigin);
+    const origin = isValidOrigin ? requestOrigin : DEFAULT_ORIGIN;
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : userEmail,
