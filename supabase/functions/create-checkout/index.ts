@@ -21,7 +21,7 @@ serve(async (req) => {
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY not set");
 
-    const { billingCycle = "monthly" } = await req.json().catch(() => ({}));
+    const { billingCycle = "monthly", returnPath = "/" } = await req.json().catch(() => ({}));
     if (billingCycle !== "monthly" && billingCycle !== "yearly") {
       return new Response(JSON.stringify({ error: "Invalid billing cycle" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -55,11 +55,22 @@ serve(async (req) => {
       if (customers.data.length > 0) customerId = customers.data[0].id;
     }
 
+    const safeReturnPath =
+      typeof returnPath === "string" && returnPath.startsWith("/") && !returnPath.startsWith("//")
+        ? returnPath
+        : "/";
+
     // Only allow http(s) origins to prevent open-redirect; fallback to this project's published URL
-    const DEFAULT_ORIGIN = "https://insight-forge-pro-50.lovable.app";
+    const DEFAULT_ORIGIN = Deno.env.get("APP_ORIGIN") || "https://datavision.lovable.app";
     const requestOrigin = req.headers.get("origin") ?? "";
     const isValidOrigin = /^https?:\/\/[^\s]+$/.test(requestOrigin);
     const origin = isValidOrigin ? requestOrigin : DEFAULT_ORIGIN;
+    const cancelUrl = new URL(safeReturnPath, origin);
+    cancelUrl.searchParams.set("checkout", "cancel");
+    const successUrl = new URL("/signup", origin);
+    successUrl.searchParams.set("checkout", "success");
+    successUrl.searchParams.set("plan", "pro");
+
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : userEmail,
@@ -68,8 +79,8 @@ serve(async (req) => {
       subscription_data: {
         metadata: { plan: "pro", billing_cycle: billingCycle },
       },
-      success_url: `${origin}/signup?checkout=success&plan=pro`,
-      cancel_url: `${origin}/?checkout=cancel`,
+      success_url: successUrl.toString(),
+      cancel_url: cancelUrl.toString(),
     });
 
     return new Response(JSON.stringify({ url: session.url }), {
