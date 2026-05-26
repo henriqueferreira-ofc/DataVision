@@ -28,9 +28,11 @@ export class ErrorBoundary extends React.Component<React.PropsWithChildren, Erro
           <p className="mt-3 text-sm text-muted-foreground">
             A página encontrou um erro ao carregar. Tente voltar para o início e entrar novamente.
           </p>
-          <p className="mt-4 rounded-md border bg-muted/40 p-3 text-left text-xs text-muted-foreground">
-            {this.state.error.message}
-          </p>
+          {import.meta.env.DEV && (
+            <p className="mt-4 rounded-md border bg-muted/40 p-3 text-left text-xs text-muted-foreground">
+              {this.state.error.message}
+            </p>
+          )}
           <Button className="mt-6" onClick={() => window.location.assign("/")}>
             Voltar ao início
           </Button>
