@@ -23,6 +23,10 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     document.documentElement.lang = language;
+    document.documentElement.classList.add("notranslate");
+    document.documentElement.setAttribute("translate", "no");
+    document.body.classList.add("notranslate");
+    document.body.setAttribute("translate", "no");
     document
       .querySelector('meta[name="description"]')
       ?.setAttribute("content", translations[language].meta.description);

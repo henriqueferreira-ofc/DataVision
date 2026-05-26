@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" translate="no" class="notranslate">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -12,6 +12,7 @@
     <meta name="theme-color" content="#3b82f6" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="DataVision" />
+    <meta name="google" content="notranslate" />
     <meta name="description" content="Transform raw data into strategic decisions with AI-powered analysis, insights, and executive reports.">
     <meta name="author" content="DataVision" />
 
@@ -29,8 +30,23 @@
   <meta name="twitter:description" content="Transform raw data into strategic decisions with AI-powered analysis, insights, and executive reports.">
 </head>
 
-  <body>
-    <div id="root"></div>
+  <body translate="no" class="notranslate">
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem("datavision-lang");
+          var lang = stored === "pt-BR" || stored === "en"
+            ? stored
+            : (navigator.language && navigator.language.indexOf("pt") === 0 ? "pt-BR" : "en");
+          document.documentElement.lang = lang;
+          document.documentElement.setAttribute("translate", "no");
+          document.body && document.body.setAttribute("translate", "no");
+        } catch (error) {
+          document.documentElement.lang = "en";
+        }
+      })();
+    </script>
+    <div id="root" translate="no" class="notranslate"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
