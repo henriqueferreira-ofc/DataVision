@@ -32,7 +32,7 @@ export default function SettingsPage() {
     }
   };
 
-  const planLabel = plan === "pro" ? "Pro" : plan === "basic" ? "Básico" : pt ? "Gratuito" : "Free";
+  const planLabel = plan === "pro" ? "Pro" : pt ? "Gratuito" : "Free";
 
   return (
     <div className="space-y-6">
