@@ -201,10 +201,10 @@ const translationsData = {
   },
   "pt-BR": {
     nav: {
-      features: "Funcionalidades",
-      pricing: "Planos",
+      features: "Recursos",
+      pricing: "Preços",
       login: "Entrar",
-      signup: "Começar Agora",
+      signup: "Começar agora",
       dashboard: "Painel",
       logout: "Sair",
       menu: "Menu",
@@ -230,11 +230,11 @@ const translationsData = {
     hero: {
       badge: "Inteligência Empresarial com IA",
       title: "Transforme dados brutos em decisões estratégicas",
-      subtitle: "Envie suas planilhas e arquivos. Receba análises profundas, insights acionáveis e relatórios executivos gerados por IA — em segundos.",
-      cta: "Começar a Analisar",
-      ctaSecondary: "Veja Como Funciona",
+      subtitle: "Envie suas planilhas e arquivos. Receba análises profundas, insights acionáveis e relatórios executivos prontos para apresentação, com tecnologia de IA — em segundos.",
+      cta: "Começar a analisar",
+      ctaSecondary: "Veja como funciona",
       stat1: "Análises realizadas",
-      stat2: "Tempo economizado",
+      stat2: "Tempo economizado por relatório",
       stat3: "Precisão média",
       preview: {
         revenue: "Receita",
