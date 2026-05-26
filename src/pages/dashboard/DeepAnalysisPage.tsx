@@ -150,10 +150,10 @@ export default function DeepAnalysisPage() {
         </div>
         <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:items-center">
           <Button variant="outline" size="sm" className="gap-2" onClick={() => runExport("pdf")} disabled={exporting === "pdf"}>
-            {exporting === "pdf" ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />} PDF
+            {exporting === "pdf" ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />} <span>PDF</span>
           </Button>
           <Button variant="outline" size="sm" className="gap-2" onClick={() => runExport("pptx")} disabled={exporting === "pptx"}>
-            {exporting === "pptx" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Presentation className="h-4 w-4" />} PPTX
+            {exporting === "pptx" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Presentation className="h-4 w-4" />} <span>PPTX</span>
           </Button>
         </div>
       </div>

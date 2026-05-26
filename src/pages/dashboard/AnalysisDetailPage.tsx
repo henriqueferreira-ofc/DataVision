@@ -114,10 +114,10 @@ export default function AnalysisDetailPage() {
         {analysis.status === "completed" && (
           <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:shrink-0">
             <Button variant="outline" size="sm" className="gap-1.5" onClick={handleExportPDF} disabled={exporting === "pdf"}>
-              {exporting === "pdf" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <>{!userIsPro && <Lock className="h-3 w-3" />}<FileText className="h-3.5 w-3.5" /></>} PDF
+              {exporting === "pdf" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <>{!userIsPro && <Lock className="h-3 w-3" />}<FileText className="h-3.5 w-3.5" /></>} <span>PDF</span>
             </Button>
             <Button variant="outline" size="sm" className="gap-1.5" onClick={handleExportPPTX} disabled={exporting === "pptx"}>
-              {exporting === "pptx" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <>{!userIsPro && <Lock className="h-3 w-3" />}<Presentation className="h-3.5 w-3.5" /></>} PPTX
+              {exporting === "pptx" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <>{!userIsPro && <Lock className="h-3 w-3" />}<Presentation className="h-3.5 w-3.5" /></>} <span>PPTX</span>
             </Button>
             {userIsPro && (
               <Button size="sm" className="col-span-2 gap-1.5 sm:col-span-1" asChild>
