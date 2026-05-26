@@ -28,7 +28,8 @@ export function UpgradeModal({ open, onOpenChange, feature }: UpgradeModalProps)
     try {
       window.open(await getProCheckoutUrl(billing), "_blank");
     } catch (err) {
-      toast({ variant: "destructive", title: "Erro", description: err instanceof Error ? err.message : "Erro inesperado" });
+      console.error("Checkout error:", err);
+      toast({ variant: "destructive", title: "Erro", description: pt ? "Não foi possível iniciar o checkout. Tente novamente." : "Could not start checkout. Please try again." });
     } finally {
       setLoading(null);
     }

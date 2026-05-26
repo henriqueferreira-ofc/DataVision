@@ -26,7 +26,8 @@ export default function SettingsPage() {
       if (error) throw error;
       if (data?.url) window.open(data.url, "_blank");
     } catch (err: any) {
-      toast({ variant: "destructive", title: "Erro", description: err.message });
+      console.error("Customer portal error:", err);
+      toast({ variant: "destructive", title: "Erro", description: pt ? "Não foi possível abrir o portal de assinatura. Tente novamente." : "Could not open the subscription portal. Please try again." });
     } finally {
       setPortalLoading(false);
     }
