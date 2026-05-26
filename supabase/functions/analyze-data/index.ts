@@ -291,7 +291,18 @@ ${dataContent}`;
 
     logStep("Analysis saved successfully", { analysisId, chartsCount: charts.length, kpisCount: safeAnalysis.kpis.length });
 
-    return new Response(JSON.stringify({ success: true, analysis: safeAnalysis }), {
+    const responseAnalysis = userIsPro
+      ? safeAnalysis
+      : {
+          ...safeAnalysis,
+          swot: { strengths: [], weaknesses: [], opportunities: [], threats: [] },
+          executiveScore: { overall: 0, categories: [], verdict: "" },
+          correlations: [],
+          dataQuality: { score: 0, completeness: 0, consistency: 0, observations: [] },
+          charts: finalCharts,
+        };
+
+    return new Response(JSON.stringify({ success: true, analysis: responseAnalysis }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
