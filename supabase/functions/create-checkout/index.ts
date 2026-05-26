@@ -55,7 +55,9 @@ serve(async (req) => {
       if (customers.data.length > 0) customerId = customers.data[0].id;
     }
 
-    const origin = req.headers.get("origin") || "https://datavision.lovable.app";
+    const ALLOWED_ORIGINS = ["https://datavision.lovable.app", "https://insight-forge-pro-50.lovable.app"];
+    const requestOrigin = req.headers.get("origin") ?? "";
+    const origin = ALLOWED_ORIGINS.includes(requestOrigin) ? requestOrigin : "https://datavision.lovable.app";
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : userEmail,
@@ -72,10 +74,8 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unexpected checkout error";
-    console.error("create-checkout error:", message);
-
-    return new Response(JSON.stringify({ error: message }), {
+    console.error("create-checkout error:", error instanceof Error ? error.message : error);
+    return new Response(JSON.stringify({ error: "Unable to start checkout" }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });
