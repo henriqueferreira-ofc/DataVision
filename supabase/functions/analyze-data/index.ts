@@ -41,6 +41,18 @@ serve(async (req) => {
     const { fileContent, fileName, language } = body;
     logStep("Request received", { analysisId, fileName, contentLength: fileContent?.length });
 
+    if (!analysisId) {
+      return new Response(JSON.stringify({ error: "Invalid request" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    // Verify ownership before any write (prevents IDOR via service-role bypass of RLS)
+    const { data: existing, error: ownerErr } = await supabase
+      .from("analyses").select("user_id").eq("id", analysisId).maybeSingle();
+    if (ownerErr || !existing || existing.user_id !== user.id) {
+      logStep("Ownership check failed", { analysisId, userId: user.id });
+      return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     await supabase.from("analyses").update({ status: "processing" }).eq("id", analysisId);
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
@@ -257,11 +269,12 @@ ${dataContent}`;
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    logStep("FATAL ERROR", { message: error.message, stack: error.stack?.substring(0, 300) });
+    const msg = error instanceof Error ? error.message : String(error);
+    logStep("FATAL ERROR", { message: msg, stack: error instanceof Error ? error.stack?.substring(0, 300) : undefined });
     if (analysisId) {
       await supabase.from("analyses").update({ status: "error" }).eq("id", analysisId).catch(() => {});
     }
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: "An unexpected error occurred" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

@@ -35,7 +35,9 @@ serve(async (req) => {
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     if (customers.data.length === 0) throw new Error("No Stripe customer found");
 
-    const origin = req.headers.get("origin") || "https://datavision.lovable.app";
+    const ALLOWED_ORIGINS = ["https://datavision.lovable.app", "https://insight-forge-pro-50.lovable.app"];
+    const requestOrigin = req.headers.get("origin") ?? "";
+    const origin = ALLOWED_ORIGINS.includes(requestOrigin) ? requestOrigin : "https://datavision.lovable.app";
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: customers.data[0].id,
       return_url: `${origin}/dashboard/settings`,
@@ -45,7 +47,8 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
+    console.error("[customer-portal] error:", error instanceof Error ? error.message : error);
+    return new Response(JSON.stringify({ error: "Unable to open customer portal" }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });
