@@ -79,9 +79,9 @@ export function HeroSection() {
               {/* Mock dashboard */}
               <div className="grid gap-3 p-3 sm:grid-cols-4 sm:gap-4 sm:p-5">
                 {[
-                  { icon: TrendingUp, label: "Revenue", value: "R$ 248.5K", delta: "+12.4%", color: "text-emerald-500" },
-                  { icon: Activity, label: "Active Users", value: "8,492", delta: "+5.1%", color: "text-primary" },
-                  { icon: Sparkles, label: "Conversions", value: "1,284", delta: "+8.7%", color: "text-accent" },
+                  { icon: TrendingUp, label: t.hero.preview.revenue, value: "R$ 248.5K", delta: "+12.4%", color: "text-emerald-500" },
+                  { icon: Activity, label: t.hero.preview.activeUsers, value: "8,492", delta: "+5.1%", color: "text-primary" },
+                  { icon: Sparkles, label: t.hero.preview.conversions, value: "1,284", delta: "+8.7%", color: "text-accent" },
                   { icon: BarChart3, label: "AOV", value: "R$ 193", delta: "+2.3%", color: "text-purple-500" },
                 ].map((k, i) => (
                   <div key={i} className="group/card relative overflow-hidden rounded-xl border bg-card/70 p-3 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg">
@@ -100,7 +100,7 @@ export function HeroSection() {
                 {/* Chart area */}
                 <div className="rounded-xl border bg-card/70 p-3 sm:col-span-3 sm:p-4">
                   <div className="mb-3 flex items-center justify-between">
-                    <span className="text-xs font-semibold">Performance</span>
+                    <span className="text-xs font-semibold">{t.hero.preview.performance}</span>
                     <div className="flex gap-1">
                       {["7D", "30D", "90D"].map((p, i) => (
                         <span key={p} className={`rounded px-1.5 py-0.5 text-[10px] transition-colors ${i === 1 ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground"}`}>{p}</span>
@@ -120,9 +120,9 @@ export function HeroSection() {
 
                 {/* Side panel */}
                 <div className="rounded-xl border bg-card/70 p-4">
-                  <span className="text-xs font-semibold">Top Insights</span>
+                  <span className="text-xs font-semibold">{t.hero.preview.topInsights}</span>
                   <ul className="mt-3 space-y-2.5">
-                    {["Growth trending up", "Conversion +18% MoM", "Retention healthy"].map((txt, i) => (
+                    {[t.hero.preview.insight1, t.hero.preview.insight2, t.hero.preview.insight3].map((txt, i) => (
                       <li key={i} className="flex items-start gap-2 text-[11px] text-muted-foreground">
                         <span className="mt-1 inline-flex h-1.5 w-1.5 shrink-0 rounded-full bg-gradient-to-br from-primary to-accent" />
                         {txt}

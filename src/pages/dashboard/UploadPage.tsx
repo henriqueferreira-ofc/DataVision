@@ -72,11 +72,11 @@ export default function UploadPage() {
       (f) => ACCEPTED_TYPES.includes(f.type) || f.name.endsWith(".csv")
     );
     if (valid.length === 0) {
-      toast({ variant: "destructive", title: "Error", description: language === "pt-BR" ? "Formato de arquivo não suportado" : "Unsupported file format" });
+      toast({ variant: "destructive", title: t.common.error, description: t.dashboard.unsupportedFile });
       return;
     }
     setFiles((prev) => [...prev, ...valid]);
-  }, [toast, language]);
+  }, [toast, t]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -139,23 +139,21 @@ export default function UploadPage() {
           console.error("Analysis function error:", fnError);
           toast({
             variant: "destructive",
-            title: "Error",
-            description: language === "pt-BR" ? "Erro ao analisar arquivo" : "Error analyzing file",
+            title: t.common.error,
+            description: t.dashboard.fileAnalysisError,
           });
         } else {
           toast({
-            title: language === "pt-BR" ? "Análise concluída!" : "Analysis complete!",
-            description: language === "pt-BR"
-              ? `${file.name} foi analisado com sucesso`
-              : `${file.name} was analyzed successfully`,
+            title: t.dashboard.fileAnalysisComplete,
+            description: t.dashboard.fileAnalysisCompleteDesc.replace("{file}", file.name),
           });
         }
       } catch (err: any) {
         console.error("Upload error:", err);
         toast({
           variant: "destructive",
-          title: "Error",
-          description: "Failed to upload or analyze the file. Please try again.",
+          title: t.common.error,
+          description: t.dashboard.uploadError,
         });
       }
     }
@@ -246,7 +244,7 @@ export default function UploadPage() {
               </>
             ) : (
               <>
-                {language === "pt-BR" ? "Analisar Arquivos" : "Analyze Files"}
+                {t.dashboard.analyzeFiles}
                 <ArrowRight className="h-4 w-4" />
               </>
             )}

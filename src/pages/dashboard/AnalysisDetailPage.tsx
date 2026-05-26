@@ -25,11 +25,11 @@ const CHART_COLORS = [
   "hsl(30, 90%, 55%)", "hsl(340, 75%, 55%)", "hsl(190, 80%, 45%)",
 ];
 
-function ChartCard({ chart, index }: { chart: any; index: number }) {
+function ChartCard({ chart, index, fallbackTitle }: { chart: any; index: number; fallbackTitle: string }) {
   if (!chart?.data?.length) return null;
   return (
     <Card>
-      <CardHeader className="pb-2"><CardTitle className="text-sm font-semibold">{chart.title || `Chart ${index + 1}`}</CardTitle></CardHeader>
+      <CardHeader className="pb-2"><CardTitle className="text-sm font-semibold">{chart.title || `${fallbackTitle} ${index + 1}`}</CardTitle></CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={280}>
           {chart.type === "pie" ? (
@@ -71,7 +71,7 @@ export default function AnalysisDetailPage() {
       if (msg === "PRO_REQUIRED") {
         setShowUpgrade(true);
       } else {
-        toast({ variant: "destructive", title: pt ? "Erro" : "Error", description: msg });
+        toast({ variant: "destructive", title: t.common.error, description: msg });
       }
     } finally {
       setExporting(null);
@@ -82,7 +82,7 @@ export default function AnalysisDetailPage() {
   const handleExportPPTX = () => runExport("pptx");
 
   if (isLoading) return <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
-  if (!analysis) return <div className="py-20 text-center"><p className="text-muted-foreground">{pt ? "Análise não encontrada" : "Analysis not found"}</p></div>;
+  if (!analysis) return <div className="py-20 text-center"><p className="text-muted-foreground">{t.dashboard.analysisNotFound}</p></div>;
 
   const isProcessing = analysis.status === "processing" || analysis.status === "pending";
   const diagnosis = analysis.diagnosis as any;
@@ -93,7 +93,7 @@ export default function AnalysisDetailPage() {
   const chartsRaw = analysis.charts_data as any;
   let charts: any[] = Array.isArray(chartsRaw) ? chartsRaw : [];
   if (charts.length === 0 && chartsRaw?.categories) {
-    charts = [{ title: "Overview", type: chartsRaw.chartType || "bar", data: chartsRaw.categories.map((cat: string, i: number) => ({ name: cat, value: chartsRaw.values[i] })) }];
+    charts = [{ title: t.common.overview, type: chartsRaw.chartType || "bar", data: chartsRaw.categories.map((cat: string, i: number) => ({ name: cat, value: chartsRaw.values[i] })) }];
   }
 
   // Basic users see only first 2 charts
@@ -101,7 +101,7 @@ export default function AnalysisDetailPage() {
 
   return (
     <div className="space-y-6">
-      <UpgradeModal open={showUpgrade} onOpenChange={setShowUpgrade} feature={pt ? "Exportação de Relatórios" : "Report Export"} />
+      <UpgradeModal open={showUpgrade} onOpenChange={setShowUpgrade} feature={t.dashboard.reportExport} />
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex min-w-0 items-center gap-3">
@@ -121,12 +121,12 @@ export default function AnalysisDetailPage() {
             </Button>
             {userIsPro && (
               <Button size="sm" className="col-span-2 gap-1.5 sm:col-span-1" asChild>
-                <Link to={`/dashboard/analyses/${id}/deep`}><Microscope className="h-3.5 w-3.5" />{pt ? "Análise Profunda" : "Deep Analysis"}</Link>
+                <Link to={`/dashboard/analyses/${id}/deep`}><Microscope className="h-3.5 w-3.5" />{t.dashboard.deepAnalysis}</Link>
               </Button>
             )}
             {!userIsPro && (
               <Button size="sm" variant="outline" className="col-span-2 gap-1.5 border-yellow-500/30 text-yellow-600 hover:bg-yellow-500/10 sm:col-span-1" onClick={() => setShowUpgrade(true)}>
-                <Crown className="h-3.5 w-3.5" />{pt ? "Análise Profunda" : "Deep Analysis"}
+                <Crown className="h-3.5 w-3.5" />{t.dashboard.deepAnalysis}
               </Button>
             )}
           </div>
@@ -134,11 +134,11 @@ export default function AnalysisDetailPage() {
       </div>
 
       {isProcessing && (
-        <Card className="border-primary/30 bg-primary/5"><CardContent className="flex items-center gap-4 py-6"><Loader2 className="h-6 w-6 animate-spin text-primary" /><div><p className="font-medium">{t.dashboard.analyzing}</p><p className="text-sm text-muted-foreground">{pt ? "A IA está analisando seu arquivo..." : "AI is analyzing your file..."}</p></div></CardContent></Card>
+        <Card className="border-primary/30 bg-primary/5"><CardContent className="flex items-center gap-4 py-6"><Loader2 className="h-6 w-6 animate-spin text-primary" /><div><p className="font-medium">{t.dashboard.analyzing}</p><p className="text-sm text-muted-foreground">{t.dashboard.aiAnalyzing}</p></div></CardContent></Card>
       )}
 
       {analysis.status === "error" && (
-        <Card className="border-destructive/30 bg-destructive/5"><CardContent className="flex items-center gap-4 py-6"><AlertCircle className="h-6 w-6 text-destructive" /><div><p className="font-medium">{pt ? "Falha na análise" : "Analysis failed"}</p><p className="text-sm text-muted-foreground">{pt ? "Houve um erro ao processar este arquivo." : "There was an error processing this file."}</p></div></CardContent></Card>
+        <Card className="border-destructive/30 bg-destructive/5"><CardContent className="flex items-center gap-4 py-6"><AlertCircle className="h-6 w-6 text-destructive" /><div><p className="font-medium">{t.dashboard.analysisFailed}</p><p className="text-sm text-muted-foreground">{t.dashboard.analysisFailedDesc}</p></div></CardContent></Card>
       )}
 
       {analysis.status === "completed" && (
@@ -154,12 +154,12 @@ export default function AnalysisDetailPage() {
           {visibleCharts.length > 0 && (
             <div>
               <div className={`grid gap-4 ${visibleCharts.length === 1 ? "" : "md:grid-cols-2"}`}>
-                {visibleCharts.map((chart: any, i: number) => <ChartCard key={i} chart={chart} index={i} />)}
+                {visibleCharts.map((chart: any, i: number) => <ChartCard key={i} chart={chart} index={i} fallbackTitle={t.common.chart} />)}
               </div>
               {!userIsPro && charts.length > 2 && (
                 <div className="mt-4 flex items-center justify-center">
                   <Button variant="outline" className="gap-2 border-yellow-500/30 text-yellow-600 hover:bg-yellow-500/10" onClick={() => setShowUpgrade(true)}>
-                    <Crown className="h-4 w-4" /> {pt ? `Ver todos os ${charts.length} gráficos (PRO)` : `View all ${charts.length} charts (PRO)`}
+                    <Crown className="h-4 w-4" /> {t.dashboard.unlockCharts.replace("{count}", String(charts.length))}
                   </Button>
                 </div>
               )}

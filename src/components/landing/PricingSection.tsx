@@ -75,7 +75,7 @@ export function PricingSection() {
 
       <div className="container mx-auto px-4">
         <ScrollReveal className="mx-auto max-w-2xl text-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">Pricing</span>
+          <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">{t.nav.pricing}</span>
           <h2 className="mt-4 text-balance text-3xl font-bold tracking-tight md:text-5xl">
             <span className="text-gradient">{t.pricing.title}</span>
           </h2>

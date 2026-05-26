@@ -14,8 +14,8 @@ export function Navbar() {
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-lg">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link to="/" className="flex items-center gap-2.5">
-          <img src={logo} alt="DataVison logo" className="h-8 w-8 rounded-lg" />
-          <span className="text-lg font-bold tracking-tight">DataVison</span>
+          <img src={logo} alt="DataVision logo" className="h-8 w-8 rounded-lg" />
+          <span className="text-lg font-bold tracking-tight">DataVision</span>
         </Link>
 
         <div className="hidden items-center gap-8 md:flex">

@@ -54,7 +54,7 @@ export default function AnalysesPage() {
         <h1 className="text-2xl font-bold">{t.dashboard.analyses}</h1>
         <Button size="sm" asChild className="w-full gap-1.5 active:scale-[0.97] sm:w-auto">
           <Link to="/dashboard/upload">
-            {language === "pt-BR" ? "Nova Análise" : "New Analysis"}
+            {t.dashboard.newAnalysis}
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </Button>
@@ -77,7 +77,7 @@ export default function AnalysesPage() {
                     </p>
                   </div>
                   <div className="shrink-0">
-                    <StatusBadge status={analysis.status} language={language} />
+                    <StatusBadge status={analysis.status} labels={t.dashboard} />
                   </div>
                 </CardContent>
               </Card>
@@ -89,12 +89,12 @@ export default function AnalysesPage() {
   );
 }
 
-function StatusBadge({ status, language }: { status: string; language: string }) {
+function StatusBadge({ status, labels }: { status: string; labels: { statusCompleted: string; statusProcessing: string; statusError: string; statusPending: string } }) {
   if (status === "completed") {
     return (
       <Badge variant="outline" className="gap-1 border-accent/30 bg-accent/10 text-accent">
         <CheckCircle className="h-3 w-3" />
-        {language === "pt-BR" ? "Concluída" : "Completed"}
+        {labels.statusCompleted}
       </Badge>
     );
   }
@@ -102,7 +102,7 @@ function StatusBadge({ status, language }: { status: string; language: string })
     return (
       <Badge variant="outline" className="gap-1 border-primary/30 bg-primary/10 text-primary">
         <Loader2 className="h-3 w-3 animate-spin" />
-        {language === "pt-BR" ? "Processando" : "Processing"}
+        {labels.statusProcessing}
       </Badge>
     );
   }
@@ -110,14 +110,14 @@ function StatusBadge({ status, language }: { status: string; language: string })
     return (
       <Badge variant="outline" className="gap-1 border-destructive/30 bg-destructive/10 text-destructive">
         <Clock className="h-3 w-3" />
-        {language === "pt-BR" ? "Erro" : "Error"}
+        {labels.statusError}
       </Badge>
     );
   }
   return (
     <Badge variant="outline" className="gap-1">
       <Clock className="h-3 w-3" />
-      {language === "pt-BR" ? "Pendente" : "Pending"}
+      {labels.statusPending}
     </Badge>
   );
 }

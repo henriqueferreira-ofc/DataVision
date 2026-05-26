@@ -23,7 +23,7 @@ export default function Login() {
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
-        toast({ variant: "destructive", title: "Erro", description: error.message });
+        toast({ variant: "destructive", title: t.common.error, description: error.message });
         return;
       }
 
@@ -31,8 +31,8 @@ export default function Login() {
     } catch (error) {
       toast({
         variant: "destructive",
-        title: "Erro",
-        description: error instanceof Error ? error.message : "Não foi possível entrar agora.",
+        title: t.common.error,
+        description: error instanceof Error ? error.message : t.auth.loginFallbackError,
       });
     } finally {
       setLoading(false);
@@ -75,7 +75,7 @@ export default function Login() {
                 <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
               </div>
               <Button type="submit" className="w-full active:scale-[0.97]" disabled={loading}>
-                {loading ? (t.auth.loginButton === "Entrar" ? "Entrando..." : "Signing in...") : t.auth.loginButton}
+                {loading ? t.auth.loginLoading : t.auth.loginButton}
               </Button>
             </form>
 

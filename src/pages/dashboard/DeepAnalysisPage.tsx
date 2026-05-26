@@ -61,7 +61,7 @@ function ScoreRing({ score, size = 120 }: { score: number; size?: number }) {
 
 export default function DeepAnalysisPage() {
   const { id } = useParams();
-  const { language } = useLanguage();
+  const { t, language } = useLanguage();
   const { data: analysis, isLoading } = useAnalysis(id);
   const { plan } = useSubscription();
   const { toast } = useToast();
@@ -91,7 +91,7 @@ export default function DeepAnalysisPage() {
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       if (msg === "PRO_REQUIRED") setShowUpgrade(true);
-      else toast({ variant: "destructive", title: pt ? "Erro" : "Error", description: msg });
+      else toast({ variant: "destructive", title: t.common.error, description: msg });
     } finally {
       setExporting(null);
     }
@@ -114,7 +114,7 @@ export default function DeepAnalysisPage() {
   }
 
   if (isLoading || serverGate === "checking") return <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
-  if (!analysis || analysis.status !== "completed") return <div className="py-20 text-center text-muted-foreground">{pt ? "Análise não encontrada ou ainda em processamento" : "Analysis not found or still processing"}</div>;
+  if (!analysis || analysis.status !== "completed") return <div className="py-20 text-center text-muted-foreground">{t.dashboard.stillProcessing}</div>;
 
   const kpis = (analysis.kpis as any[]) || [];
   const chartsRaw = analysis.charts_data as any;
@@ -142,7 +142,7 @@ export default function DeepAnalysisPage() {
           <Button variant="ghost" size="icon" asChild><Link to={`/dashboard/analyses/${id}`}><ArrowLeft className="h-4 w-4" /></Link></Button>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-xl font-bold sm:text-2xl">{pt ? "Análise Profunda" : "Deep Analysis"}</h1>
+              <h1 className="text-xl font-bold sm:text-2xl">{t.dashboard.deepAnalysis}</h1>
               <Badge className="bg-yellow-500/10 text-yellow-600 border-yellow-500/30"><Crown className="h-3 w-3 mr-1" />PRO</Badge>
             </div>
             <p className="truncate text-sm text-muted-foreground">{analysis.file_name}</p>

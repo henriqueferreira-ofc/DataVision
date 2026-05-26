@@ -72,7 +72,7 @@ export default function ReportsPage() {
       <div>
         <h1 className="text-2xl font-bold">{t.dashboard.reports}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          {language === "pt-BR" ? "Exporte relatórios executivos das suas análises concluídas" : "Export executive reports from your completed analyses"}
+          {t.dashboard.reportsSubtitle}
         </p>
       </div>
 
@@ -108,11 +108,11 @@ export default function ReportsPage() {
                     onClick={(e) => {
                       e.preventDefault();
                       exportAnalysisReport(analysis, language);
-                      toast({ title: language === "pt-BR" ? "Relatório exportado!" : "Report exported!" });
+                      toast({ title: t.dashboard.reportExported });
                     }}
                   >
                     <Download className="h-3.5 w-3.5" />
-                    {language === "pt-BR" ? "Exportar" : "Export"}
+                    {t.common.export}
                   </Button>
                   <Button variant="ghost" size="sm" className="gap-1 text-primary" asChild>
                     <Link to={`/dashboard/analyses/${analysis.id}`}>

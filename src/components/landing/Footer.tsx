@@ -10,8 +10,8 @@ export function Footer() {
         <div className="grid gap-8 md:grid-cols-4">
           <div className="md:col-span-1">
             <div className="flex items-center gap-2.5">
-              <img src={logo} alt="DataVison logo" className="h-8 w-8 rounded-lg" />
-              <span className="text-lg font-bold">DataVison</span>
+              <img src={logo} alt="DataVision logo" className="h-8 w-8 rounded-lg" />
+              <span className="text-lg font-bold">DataVision</span>
             </div>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{t.footer.description}</p>
           </div>
@@ -35,7 +35,7 @@ export function Footer() {
         </div>
 
         <div className="mt-12 border-t pt-6 text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} DataVison. All rights reserved.
+          © {new Date().getFullYear()} DataVision. {t.common.allRightsReserved}
         </div>
       </div>
     </footer>

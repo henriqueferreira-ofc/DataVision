@@ -31,9 +31,9 @@ export default function Signup() {
     });
     setLoading(false);
     if (error) {
-      toast({ variant: "destructive", title: "Error", description: error.message });
+      toast({ variant: "destructive", title: t.common.error, description: error.message });
     } else {
-      toast({ title: "Success", description: "Check your email to confirm your account." });
+      toast({ title: t.auth.signupSuccessTitle, description: t.auth.signupSuccessDescription });
       navigate("/login");
     }
   };
@@ -75,7 +75,7 @@ export default function Signup() {
                 <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
               </div>
               <Button type="submit" className="w-full active:scale-[0.97]" disabled={loading}>
-                {loading ? (t.auth.signupButton === "Criar conta" ? "Criando conta..." : "Creating account...") : t.auth.signupButton}
+                {loading ? t.auth.signupLoading : t.auth.signupButton}
               </Button>
             </form>
 
