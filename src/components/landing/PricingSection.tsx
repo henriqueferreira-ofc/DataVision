@@ -22,7 +22,8 @@ export function PricingSection() {
     try {
       window.location.href = await getProCheckoutUrl(yearly ? "yearly" : "monthly");
     } catch (err) {
-      toast({ variant: "destructive", title: "Erro", description: err instanceof Error ? err.message : "Erro inesperado" });
+      console.error("Checkout error:", err);
+      toast({ variant: "destructive", title: "Erro", description: pt ? "Não foi possível iniciar o checkout. Tente novamente." : "Could not start checkout. Please try again." });
     } finally {
       setLoadingPro(false);
     }

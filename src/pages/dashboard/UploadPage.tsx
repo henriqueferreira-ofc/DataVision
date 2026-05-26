@@ -155,7 +155,7 @@ export default function UploadPage() {
         toast({
           variant: "destructive",
           title: "Error",
-          description: err.message || "Upload failed",
+          description: "Failed to upload or analyze the file. Please try again.",
         });
       }
     }
