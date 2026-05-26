@@ -80,13 +80,30 @@ export function deriveStrategicSections({
     return parseMetricValue(match?.value);
   };
 
-  const pendingValue = findMetric((n) => n.includes("valor") && n.includes("pendente"));
-  const paidValue = findMetric((n) => n.includes("valor") && n.includes("pago"));
+  const pendingValue = findMetric((n) =>
+    (n.includes("valor") && n.includes("pendente")) ||
+    (n.includes("amount") && (n.includes("outstanding") || n.includes("pending")))
+  );
+  const paidValue = findMetric((n) =>
+    (n.includes("valor") && n.includes("pago")) ||
+    (n.includes("amount") && n.includes("paid"))
+  );
   const pendingPercentage =
-    findMetric((n) => n.includes("percentual") && n.includes("pendente")) ||
+    findMetric((n) =>
+      (n.includes("percentual") && n.includes("pendente")) ||
+      (n.includes("percentage") && (n.includes("outstanding") || n.includes("pending")))
+    ) ||
     (pendingValue + paidValue > 0 ? (pendingValue / (pendingValue + paidValue)) * 100 : 0);
-  const pendingCount = findMetric((n) => n.includes("número") && n.includes("pendente"));
-  const paidCount = findMetric((n) => n.includes("número") && n.includes("paga"));
+  const pendingCount = findMetric((n) =>
+    (n.includes("número") && n.includes("pendente")) ||
+    (n.includes("number") && (n.includes("outstanding") || n.includes("pending"))) ||
+    (n.includes("count") && (n.includes("outstanding") || n.includes("pending")))
+  );
+  const paidCount = findMetric((n) =>
+    (n.includes("número") && n.includes("paga")) ||
+    (n.includes("number") && n.includes("paid")) ||
+    (n.includes("count") && n.includes("paid"))
+  );
 
   const findings = Array.isArray(diagnosis?.findings) ? diagnosis.findings : [];
   const bottlenecks = Array.isArray(diagnosis?.bottlenecks) ? diagnosis.bottlenecks : [];

@@ -169,6 +169,8 @@ REQUIRED JSON STRUCTURE:
 }
 
 CRITICAL RULES:
+- EVERY user-facing string in the JSON must be written in ${lang}: KPI names, chart titles, chart category names, SWOT items, recommendations, observations, verdicts, and action plan items.
+- Do not mix Portuguese and English in the same response. If ${lang} is English, all labels and narratives must be English. If ${lang} is Portuguese (Brazil), all labels and narratives must be Portuguese (Brazil).
 - Generate exactly 4-6 charts. MANDATORY: at least 1 bar, 1 pie, 1 line, and 1 area chart. Each MUST be a DIFFERENT type.
 - KPIs: include 4-6 real calculated metrics from the data with real numbers.
 - executiveScore.overall: 0-100 score. categories must have 4 items scored 0-100.
@@ -242,7 +244,7 @@ ${dataContent}`;
       const cd = analysis.chartsData;
       if (cd.categories && cd.values) {
         charts = [{
-          title: "Overview",
+          title: language === "pt-BR" ? "Visão geral" : "Overview",
           type: cd.chartType || "bar",
           data: cd.categories.map((cat: string, i: number) => ({ name: cat, value: cd.values[i] })),
         }];

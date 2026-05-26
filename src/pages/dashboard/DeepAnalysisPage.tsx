@@ -21,6 +21,7 @@ import {
 } from "recharts";
 import { useState, useEffect } from "react";
 import { deriveStrategicSections, clampScore, parseMetricValue, formatCurrency } from "@/lib/deriveStrategicSections";
+import { localizeAnalysisValue } from "@/lib/localizeAnalysis";
 
 const COLORS = [
   "hsl(217,91%,60%)", "hsl(168,72%,43%)", "hsl(280,65%,60%)",
@@ -116,19 +117,33 @@ export default function DeepAnalysisPage() {
   if (isLoading || serverGate === "checking") return <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
   if (!analysis || analysis.status !== "completed") return <div className="py-20 text-center text-muted-foreground">{t.dashboard.stillProcessing}</div>;
 
-  const kpis = (analysis.kpis as any[]) || [];
+  const rawKpis = (analysis.kpis as any[]) || [];
   const chartsRaw = analysis.charts_data as any;
-  const charts: any[] = Array.isArray(chartsRaw) ? chartsRaw : [];
-  const diagnosis = analysis.diagnosis as any;
-  const insights = analysis.insights as any;
-  const actionPlan = analysis.action_plan as any;
-  const recommendations = (analysis.recommendations as string[]) || [];
-  const derivedSections = deriveStrategicSections({ diagnosis, insights, kpis, charts, recommendations, pt });
+  const rawCharts: any[] = Array.isArray(chartsRaw) ? chartsRaw : [];
+  const rawDiagnosis = analysis.diagnosis as any;
+  const rawInsights = analysis.insights as any;
+  const rawActionPlan = analysis.action_plan as any;
+  const rawRecommendations = (analysis.recommendations as string[]) || [];
+  const derivedSections = deriveStrategicSections({
+    diagnosis: rawDiagnosis,
+    insights: rawInsights,
+    kpis: rawKpis,
+    charts: rawCharts,
+    recommendations: rawRecommendations,
+    pt,
+  });
 
-  const swot = diagnosis?.swot || derivedSections.swot;
-  const executiveScore = diagnosis?.executiveScore || derivedSections.executiveScore;
-  const correlations = diagnosis?.correlations || derivedSections.correlations;
-  const dataQuality = diagnosis?.dataQuality || derivedSections.dataQuality;
+  const kpis = localizeAnalysisValue(rawKpis, language);
+  const charts = localizeAnalysisValue(rawCharts, language);
+  const diagnosis = localizeAnalysisValue(rawDiagnosis, language);
+  const insights = localizeAnalysisValue(rawInsights, language);
+  const actionPlan = localizeAnalysisValue(rawActionPlan, language);
+  const recommendations = localizeAnalysisValue(rawRecommendations, language);
+
+  const swot = localizeAnalysisValue(diagnosis?.swot || derivedSections.swot, language);
+  const executiveScore = localizeAnalysisValue(diagnosis?.executiveScore || derivedSections.executiveScore, language);
+  const correlations = localizeAnalysisValue(diagnosis?.correlations || derivedSections.correlations, language);
+  const dataQuality = localizeAnalysisValue(diagnosis?.dataQuality || derivedSections.dataQuality, language);
 
   const radarData = executiveScore?.categories?.map((c: any) => ({
     subject: c.name, A: c.score, fullMark: c.maxScore || 100,

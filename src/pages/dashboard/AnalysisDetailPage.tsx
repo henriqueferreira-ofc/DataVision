@@ -19,6 +19,7 @@ import {
 } from "recharts";
 import { useToast } from "@/hooks/use-toast";
 import { downloadPdf, downloadPptx } from "@/lib/serverExports";
+import { localizeAnalysisValue } from "@/lib/localizeAnalysis";
 
 const CHART_COLORS = [
   "hsl(217, 91%, 60%)", "hsl(168, 72%, 43%)", "hsl(280, 65%, 60%)",
@@ -85,15 +86,15 @@ export default function AnalysisDetailPage() {
   if (!analysis) return <div className="py-20 text-center"><p className="text-muted-foreground">{t.dashboard.analysisNotFound}</p></div>;
 
   const isProcessing = analysis.status === "processing" || analysis.status === "pending";
-  const diagnosis = analysis.diagnosis as any;
-  const insights = analysis.insights as any;
-  const actionPlan = analysis.action_plan as any;
-  const recommendations = analysis.recommendations as any;
-  const kpis = analysis.kpis as any[];
+  const diagnosis = localizeAnalysisValue(analysis.diagnosis as any, language);
+  const insights = localizeAnalysisValue(analysis.insights as any, language);
+  const actionPlan = localizeAnalysisValue(analysis.action_plan as any, language);
+  const recommendations = localizeAnalysisValue(analysis.recommendations as any, language);
+  const kpis = localizeAnalysisValue((analysis.kpis as any[]) || [], language);
   const chartsRaw = analysis.charts_data as any;
-  let charts: any[] = Array.isArray(chartsRaw) ? chartsRaw : [];
+  let charts: any[] = localizeAnalysisValue(Array.isArray(chartsRaw) ? chartsRaw : [], language);
   if (charts.length === 0 && chartsRaw?.categories) {
-    charts = [{ title: t.common.overview, type: chartsRaw.chartType || "bar", data: chartsRaw.categories.map((cat: string, i: number) => ({ name: cat, value: chartsRaw.values[i] })) }];
+    charts = [{ title: t.common.overview, type: chartsRaw.chartType || "bar", data: chartsRaw.categories.map((cat: string, i: number) => ({ name: localizeAnalysisValue(cat, language), value: chartsRaw.values[i] })) }];
   }
 
   // Basic users see only first 2 charts
