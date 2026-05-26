@@ -7,8 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { exportDeepAnalysisPdf } from "@/lib/exportDeepAnalysisPdf";
-import { exportDeepAnalysisPptx } from "@/lib/exportDeepAnalysisPptx";
+import { downloadPdf, downloadPptx, fetchDeepAnalysis } from "@/lib/serverExports";
+import { useToast } from "@/hooks/use-toast";
 import {
   ArrowLeft, Loader2, TrendingUp, TrendingDown, Minus, Crown, Lock, FileText, Presentation,
   Shield, Target, Zap, AlertTriangle, CheckCircle2, XCircle, ArrowUpRight, ArrowDownRight,
@@ -19,7 +19,7 @@ import {
   PieChart, Pie, Cell, LineChart, Line, AreaChart, Area, Legend,
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
 } from "recharts";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { deriveStrategicSections, clampScore, parseMetricValue, formatCurrency } from "@/lib/deriveStrategicSections";
 
 const COLORS = [

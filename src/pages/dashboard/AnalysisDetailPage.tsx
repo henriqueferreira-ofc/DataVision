@@ -18,8 +18,7 @@ import {
   PieChart, Pie, Cell, LineChart, Line, AreaChart, Area, Legend,
 } from "recharts";
 import { useToast } from "@/hooks/use-toast";
-import { exportAnalysisPdf } from "@/lib/exportPdf";
-import { exportAnalysisPptx } from "@/lib/exportPptx";
+import { downloadPdf, downloadPptx } from "@/lib/serverExports";
 
 const CHART_COLORS = [
   "hsl(217, 91%, 60%)", "hsl(168, 72%, 43%)", "hsl(280, 65%, 60%)",
@@ -58,19 +57,29 @@ export default function AnalysisDetailPage() {
   const pt = language === "pt-BR";
   const userIsPro = isPro(plan);
 
-  const handleExportPDF = () => {
-    if (!userIsPro) { setShowUpgrade(true); return; }
-    if (!analysis) return;
-    exportAnalysisPdf(analysis as any, language);
-    toast({ title: pt ? "PDF exportado!" : "PDF exported!" });
+  const [exporting, setExporting] = useState<"pdf" | "pptx" | null>(null);
+
+  const runExport = async (kind: "pdf" | "pptx") => {
+    if (!analysis || !id) return;
+    setExporting(kind);
+    try {
+      if (kind === "pdf") await downloadPdf(id, language, false);
+      else await downloadPptx(id, language, false);
+      toast({ title: pt ? (kind === "pdf" ? "PDF exportado!" : "PowerPoint exportado!") : (kind === "pdf" ? "PDF exported!" : "PowerPoint exported!") });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg === "PRO_REQUIRED") {
+        setShowUpgrade(true);
+      } else {
+        toast({ variant: "destructive", title: pt ? "Erro" : "Error", description: msg });
+      }
+    } finally {
+      setExporting(null);
+    }
   };
 
-  const handleExportPPTX = () => {
-    if (!userIsPro) { setShowUpgrade(true); return; }
-    if (!analysis) return;
-    exportAnalysisPptx(analysis as any, language);
-    toast({ title: pt ? "PowerPoint exportado!" : "PowerPoint exported!" });
-  };
+  const handleExportPDF = () => runExport("pdf");
+  const handleExportPPTX = () => runExport("pptx");
 
   if (isLoading) return <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
   if (!analysis) return <div className="py-20 text-center"><p className="text-muted-foreground">{pt ? "Análise não encontrada" : "Analysis not found"}</p></div>;
@@ -104,11 +113,11 @@ export default function AnalysisDetailPage() {
         </div>
         {analysis.status === "completed" && (
           <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:shrink-0">
-            <Button variant="outline" size="sm" className="gap-1.5" onClick={handleExportPDF}>
-              {!userIsPro && <Lock className="h-3 w-3" />}<FileText className="h-3.5 w-3.5" /> PDF
+            <Button variant="outline" size="sm" className="gap-1.5" onClick={handleExportPDF} disabled={exporting === "pdf"}>
+              {exporting === "pdf" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <>{!userIsPro && <Lock className="h-3 w-3" />}<FileText className="h-3.5 w-3.5" /></>} PDF
             </Button>
-            <Button variant="outline" size="sm" className="gap-1.5" onClick={handleExportPPTX}>
-              {!userIsPro && <Lock className="h-3 w-3" />}<Presentation className="h-3.5 w-3.5" /> PPTX
+            <Button variant="outline" size="sm" className="gap-1.5" onClick={handleExportPPTX} disabled={exporting === "pptx"}>
+              {exporting === "pptx" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <>{!userIsPro && <Lock className="h-3 w-3" />}<Presentation className="h-3.5 w-3.5" /></>} PPTX
             </Button>
             {userIsPro && (
               <Button size="sm" className="col-span-2 gap-1.5 sm:col-span-1" asChild>
