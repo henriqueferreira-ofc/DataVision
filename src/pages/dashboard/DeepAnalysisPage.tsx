@@ -64,10 +64,40 @@ export default function DeepAnalysisPage() {
   const { language } = useLanguage();
   const { data: analysis, isLoading } = useAnalysis(id);
   const { plan } = useSubscription();
+  const { toast } = useToast();
   const [showUpgrade, setShowUpgrade] = useState(false);
+  const [serverGate, setServerGate] = useState<"checking" | "ok" | "denied">("checking");
+  const [exporting, setExporting] = useState<"pdf" | "pptx" | null>(null);
   const pt = language === "pt-BR";
 
-  if (!isPro(plan)) {
+  // Server-side gate: get-deep-analysis returns 403 if not Pro
+  useEffect(() => {
+    if (!id) return;
+    setServerGate("checking");
+    fetchDeepAnalysis(id)
+      .then(() => setServerGate("ok"))
+      .catch((err) => {
+        if (err instanceof Error && err.message === "PRO_REQUIRED") setServerGate("denied");
+        else setServerGate("denied");
+      });
+  }, [id]);
+
+  const runExport = async (kind: "pdf" | "pptx") => {
+    if (!id) return;
+    setExporting(kind);
+    try {
+      if (kind === "pdf") await downloadPdf(id, language, true);
+      else await downloadPptx(id, language, true);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg === "PRO_REQUIRED") setShowUpgrade(true);
+      else toast({ variant: "destructive", title: pt ? "Erro" : "Error", description: msg });
+    } finally {
+      setExporting(null);
+    }
+  };
+
+  if (!isPro(plan) || serverGate === "denied") {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center space-y-4">
         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-yellow-500/10">
@@ -83,7 +113,7 @@ export default function DeepAnalysisPage() {
     );
   }
 
-  if (isLoading) return <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
+  if (isLoading || serverGate === "checking") return <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
   if (!analysis || analysis.status !== "completed") return <div className="py-20 text-center text-muted-foreground">{pt ? "Análise não encontrada ou ainda em processamento" : "Analysis not found or still processing"}</div>;
 
   const kpis = (analysis.kpis as any[]) || [];
@@ -119,11 +149,11 @@ export default function DeepAnalysisPage() {
           </div>
         </div>
         <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:items-center">
-          <Button variant="outline" size="sm" className="gap-2" onClick={() => exportDeepAnalysisPdf(analysis as any, language)}>
-            <FileText className="h-4 w-4" /> PDF
+          <Button variant="outline" size="sm" className="gap-2" onClick={() => runExport("pdf")} disabled={exporting === "pdf"}>
+            {exporting === "pdf" ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />} PDF
           </Button>
-          <Button variant="outline" size="sm" className="gap-2" onClick={() => exportDeepAnalysisPptx(analysis as any, language)}>
-            <Presentation className="h-4 w-4" /> PPTX
+          <Button variant="outline" size="sm" className="gap-2" onClick={() => runExport("pptx")} disabled={exporting === "pptx"}>
+            {exporting === "pptx" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Presentation className="h-4 w-4" />} PPTX
           </Button>
         </div>
       </div>
