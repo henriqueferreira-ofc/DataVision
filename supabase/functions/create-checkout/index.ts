@@ -8,8 +8,8 @@ const corsHeaders = {
 };
 
 const PRO_PRICES = {
-  monthly: "price_1Tay5CR1cXe9FbKjahMnQqhB",
-  yearly: "price_1Tay5nR1cXe9FbKjQlAOsrGl",
+  monthly: "price_1TbJ2SJWceWgSe2V7bUqtV35",
+  yearly: "price_1TbJ2uJWceWgSe2VVM0dKM9S",
 } as const;
 
 serve(async (req) => {
