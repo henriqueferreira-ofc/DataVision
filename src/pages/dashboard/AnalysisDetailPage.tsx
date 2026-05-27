@@ -187,27 +187,38 @@ export default function AnalysisDetailPage() {
 
             <TabsContent value="insights">
               {insights && (
-                <div className="grid gap-4 md:grid-cols-3">
-                  <InsightCard title={pt ? "Oportunidades" : "Opportunities"} items={insights.opportunities || []} colorClass="bg-emerald-500" />
-                  <InsightCard title={pt ? "Riscos" : "Risks"} items={insights.risks || []} colorClass="bg-destructive" />
-                  <InsightCard title={pt ? "Padrões" : "Patterns"} items={insights.patterns || []} colorClass="bg-primary" />
-                </div>
+                <>
+                  <div className="grid gap-4 md:grid-cols-3">
+                    <InsightCard title={pt ? "Oportunidades" : "Opportunities"} items={insights.opportunities || []} colorClass="bg-emerald-500" limit={userIsPro ? undefined : 3} />
+                    <InsightCard title={pt ? "Riscos" : "Risks"} items={insights.risks || []} colorClass="bg-destructive" limit={userIsPro ? undefined : 3} />
+                    <InsightCard title={pt ? "Padrões" : "Patterns"} items={insights.patterns || []} colorClass="bg-primary" limit={userIsPro ? undefined : 3} />
+                  </div>
+                  {!userIsPro && <UpgradeHint pt={pt} onClick={() => setShowUpgrade(true)} />}
+                </>
               )}
             </TabsContent>
 
             <TabsContent value="actionPlan">
               {actionPlan && (
-                <div className="grid gap-4 md:grid-cols-3">
-                  <ActionCard title={t.dashboard.shortTerm} items={actionPlan.shortTerm || []} />
-                  <ActionCard title={t.dashboard.mediumTerm} items={actionPlan.mediumTerm || []} />
-                  <ActionCard title={t.dashboard.longTerm} items={actionPlan.longTerm || []} />
-                </div>
+                <>
+                  <div className="grid gap-4 md:grid-cols-3">
+                    <ActionCard title={t.dashboard.shortTerm} items={actionPlan.shortTerm || []} limit={userIsPro ? undefined : 2} />
+                    <ActionCard title={t.dashboard.mediumTerm} items={actionPlan.mediumTerm || []} limit={userIsPro ? undefined : 2} />
+                    <ActionCard title={t.dashboard.longTerm} items={actionPlan.longTerm || []} limit={userIsPro ? undefined : 2} />
+                  </div>
+                  {!userIsPro && <UpgradeHint pt={pt} onClick={() => setShowUpgrade(true)} />}
+                </>
               )}
             </TabsContent>
 
             <TabsContent value="recommendations">
               {recommendations && Array.isArray(recommendations) && (
-                <Card><CardContent className="pt-6"><ul className="space-y-3">{recommendations.map((r: string, i: number) => <li key={i} className="flex items-start gap-3 text-sm"><Badge variant="outline" className="mt-0.5 shrink-0 tabular-nums">{i + 1}</Badge><span>{r}</span></li>)}</ul></CardContent></Card>
+                <Card><CardContent className="pt-6">
+                  <ul className="space-y-3">
+                    {(userIsPro ? recommendations : recommendations.slice(0, 3)).map((r: string, i: number) => <li key={i} className="flex items-start gap-3 text-sm"><Badge variant="outline" className="mt-0.5 shrink-0 tabular-nums">{i + 1}</Badge><span>{r}</span></li>)}
+                  </ul>
+                  {!userIsPro && recommendations.length > 3 && <UpgradeHint pt={pt} onClick={() => setShowUpgrade(true)} hiddenCount={recommendations.length - 3} />}
+                </CardContent></Card>
               )}
             </TabsContent>
           </Tabs>
@@ -217,14 +228,29 @@ export default function AnalysisDetailPage() {
   );
 }
 
-function InsightCard({ title, items, colorClass }: { title: string; items: string[]; colorClass: string }) {
+function InsightCard({ title, items, colorClass, limit }: { title: string; items: string[]; colorClass: string; limit?: number }) {
+  const shown = typeof limit === "number" ? items.slice(0, limit) : items;
   return (
-    <Card><CardHeader className="pb-3"><CardTitle className="text-sm font-semibold">{title}</CardTitle></CardHeader><CardContent><ul className="space-y-2">{items.map((item, i) => <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground"><span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${colorClass}`} />{item}</li>)}{items.length === 0 && <li className="text-sm text-muted-foreground">—</li>}</ul></CardContent></Card>
+    <Card><CardHeader className="pb-3"><CardTitle className="text-sm font-semibold">{title}</CardTitle></CardHeader><CardContent><ul className="space-y-2">{shown.map((item, i) => <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground"><span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${colorClass}`} />{item}</li>)}{shown.length === 0 && <li className="text-sm text-muted-foreground">—</li>}</ul></CardContent></Card>
   );
 }
 
-function ActionCard({ title, items }: { title: string; items: string[] }) {
+function ActionCard({ title, items, limit }: { title: string; items: string[]; limit?: number }) {
+  const shown = typeof limit === "number" ? items.slice(0, limit) : items;
   return (
-    <Card><CardHeader className="pb-3"><CardTitle className="text-sm font-semibold">{title}</CardTitle></CardHeader><CardContent><ul className="space-y-2">{items.map((item, i) => <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground"><span className="mt-0.5 text-xs font-bold text-primary tabular-nums">{i + 1}.</span>{item}</li>)}{items.length === 0 && <li className="text-sm text-muted-foreground">—</li>}</ul></CardContent></Card>
+    <Card><CardHeader className="pb-3"><CardTitle className="text-sm font-semibold">{title}</CardTitle></CardHeader><CardContent><ul className="space-y-2">{shown.map((item, i) => <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground"><span className="mt-0.5 text-xs font-bold text-primary tabular-nums">{i + 1}.</span>{item}</li>)}{shown.length === 0 && <li className="text-sm text-muted-foreground">—</li>}</ul></CardContent></Card>
+  );
+}
+
+function UpgradeHint({ pt, onClick, hiddenCount }: { pt: boolean; onClick: () => void; hiddenCount?: number }) {
+  return (
+    <div className="mt-4 flex items-center justify-center">
+      <Button variant="outline" className="gap-2 border-yellow-500/30 text-yellow-600 hover:bg-yellow-500/10" onClick={onClick}>
+        <Crown className="h-4 w-4" />
+        {pt
+          ? (hiddenCount ? `Desbloqueie +${hiddenCount} no Pro` : "Desbloqueie insights ilimitados com Pro")
+          : (hiddenCount ? `Unlock +${hiddenCount} with Pro` : "Unlock unlimited insights with Pro")}
+      </Button>
+    </div>
   );
 }
