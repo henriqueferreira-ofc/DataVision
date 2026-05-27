@@ -55,25 +55,32 @@ serve(async (req) => {
       if (customers.data.length > 0) customerId = customers.data[0].id;
     }
 
-    const safeReturnPath =
-      typeof returnPath === "string" && returnPath.startsWith("/") && !returnPath.startsWith("//")
-        ? returnPath
-        : "/";
     const safeBasePath =
       typeof appBasePath === "string" && appBasePath.startsWith("/") && !appBasePath.startsWith("//")
         ? appBasePath
         : "/";
     const normalizedBasePath = safeBasePath.endsWith("/") ? safeBasePath : `${safeBasePath}/`;
+
+    // Ensure returnPath is prefixed with the app's base path (important for GitHub Pages subpath hosting)
+    let safeReturnPath =
+      typeof returnPath === "string" && returnPath.startsWith("/") && !returnPath.startsWith("//")
+        ? returnPath
+        : "/";
+    if (normalizedBasePath !== "/" && !safeReturnPath.startsWith(normalizedBasePath)) {
+      safeReturnPath = `${normalizedBasePath.replace(/\/$/, "")}${safeReturnPath}`;
+    }
+
     const checkoutSuccessPath =
       normalizedBasePath === "/" ? "/signup" : `${normalizedBasePath}signup`;
 
     // Only allow http(s) origins to prevent open-redirect; fallback to this project's published URL
-    const DEFAULT_ORIGIN = Deno.env.get("APP_ORIGIN") || "https://datavision.lovable.app";
+    const DEFAULT_ORIGIN = Deno.env.get("APP_ORIGIN") || "https://insight-forge-pro-50.lovable.app";
     const requestOrigin = req.headers.get("origin") ?? "";
     const isValidOrigin = /^https?:\/\/[^\s]+$/.test(requestOrigin);
     const origin = isValidOrigin ? requestOrigin : DEFAULT_ORIGIN;
     const cancelUrl = new URL(safeReturnPath, origin);
     cancelUrl.searchParams.set("checkout", "cancel");
+
     const successUrl = new URL(checkoutSuccessPath, origin);
     successUrl.searchParams.set("checkout", "success");
     successUrl.searchParams.set("plan", "pro");
