@@ -187,27 +187,38 @@ export default function AnalysisDetailPage() {
 
             <TabsContent value="insights">
               {insights && (
-                <div className="grid gap-4 md:grid-cols-3">
-                  <InsightCard title={pt ? "Oportunidades" : "Opportunities"} items={insights.opportunities || []} colorClass="bg-emerald-500" />
-                  <InsightCard title={pt ? "Riscos" : "Risks"} items={insights.risks || []} colorClass="bg-destructive" />
-                  <InsightCard title={pt ? "Padrões" : "Patterns"} items={insights.patterns || []} colorClass="bg-primary" />
-                </div>
+                <>
+                  <div className="grid gap-4 md:grid-cols-3">
+                    <InsightCard title={pt ? "Oportunidades" : "Opportunities"} items={insights.opportunities || []} colorClass="bg-emerald-500" limit={userIsPro ? undefined : 3} />
+                    <InsightCard title={pt ? "Riscos" : "Risks"} items={insights.risks || []} colorClass="bg-destructive" limit={userIsPro ? undefined : 3} />
+                    <InsightCard title={pt ? "Padrões" : "Patterns"} items={insights.patterns || []} colorClass="bg-primary" limit={userIsPro ? undefined : 3} />
+                  </div>
+                  {!userIsPro && <UpgradeHint pt={pt} onClick={() => setShowUpgrade(true)} />}
+                </>
               )}
             </TabsContent>
 
             <TabsContent value="actionPlan">
               {actionPlan && (
-                <div className="grid gap-4 md:grid-cols-3">
-                  <ActionCard title={t.dashboard.shortTerm} items={actionPlan.shortTerm || []} />
-                  <ActionCard title={t.dashboard.mediumTerm} items={actionPlan.mediumTerm || []} />
-                  <ActionCard title={t.dashboard.longTerm} items={actionPlan.longTerm || []} />
-                </div>
+                <>
+                  <div className="grid gap-4 md:grid-cols-3">
+                    <ActionCard title={t.dashboard.shortTerm} items={actionPlan.shortTerm || []} limit={userIsPro ? undefined : 2} />
+                    <ActionCard title={t.dashboard.mediumTerm} items={actionPlan.mediumTerm || []} limit={userIsPro ? undefined : 2} />
+                    <ActionCard title={t.dashboard.longTerm} items={actionPlan.longTerm || []} limit={userIsPro ? undefined : 2} />
+                  </div>
+                  {!userIsPro && <UpgradeHint pt={pt} onClick={() => setShowUpgrade(true)} />}
+                </>
               )}
             </TabsContent>
 
             <TabsContent value="recommendations">
               {recommendations && Array.isArray(recommendations) && (
-                <Card><CardContent className="pt-6"><ul className="space-y-3">{recommendations.map((r: string, i: number) => <li key={i} className="flex items-start gap-3 text-sm"><Badge variant="outline" className="mt-0.5 shrink-0 tabular-nums">{i + 1}</Badge><span>{r}</span></li>)}</ul></CardContent></Card>
+                <Card><CardContent className="pt-6">
+                  <ul className="space-y-3">
+                    {(userIsPro ? recommendations : recommendations.slice(0, 3)).map((r: string, i: number) => <li key={i} className="flex items-start gap-3 text-sm"><Badge variant="outline" className="mt-0.5 shrink-0 tabular-nums">{i + 1}</Badge><span>{r}</span></li>)}
+                  </ul>
+                  {!userIsPro && recommendations.length > 3 && <UpgradeHint pt={pt} onClick={() => setShowUpgrade(true)} hiddenCount={recommendations.length - 3} />}
+                </CardContent></Card>
               )}
             </TabsContent>
           </Tabs>
