@@ -2,12 +2,14 @@ import { Link } from "react-router-dom";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useAnalyses } from "@/hooks/useAnalyses";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { FileText, ArrowRight, Loader2, Download, BarChart3 } from "lucide-react";
+import { FileText, ArrowRight, Loader2, Download, BarChart3, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR, enUS } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
+import { useSubscription, isPro } from "@/hooks/useSubscription";
+import { UpgradeModal } from "@/components/UpgradeModal";
 
 function exportAnalysisReport(analysis: any, language: string) {
   const d = analysis.diagnosis as any;
@@ -60,6 +62,9 @@ export default function ReportsPage() {
   const { t, language } = useLanguage();
   const { data: analyses, isLoading } = useAnalyses();
   const { toast } = useToast();
+  const { plan } = useSubscription();
+  const [showUpgrade, setShowUpgrade] = useState(false);
+  const userIsPro = isPro(plan);
   const locale = language === "pt-BR" ? ptBR : enUS;
   const completedAnalyses = analyses?.filter((a) => a.status === "completed") || [];
 
@@ -69,6 +74,8 @@ export default function ReportsPage() {
 
   return (
     <div className="space-y-6">
+      <UpgradeModal open={showUpgrade} onOpenChange={setShowUpgrade} feature={t.dashboard.reportExport} />
+
       <div>
         <h1 className="text-2xl font-bold">{t.dashboard.reports}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -107,11 +114,15 @@ export default function ReportsPage() {
                     className="gap-1.5"
                     onClick={(e) => {
                       e.preventDefault();
+                      if (!userIsPro) {
+                        setShowUpgrade(true);
+                        return;
+                      }
                       exportAnalysisReport(analysis, language);
                       toast({ title: t.dashboard.reportExported });
                     }}
                   >
-                    <Download className="h-3.5 w-3.5" />
+                    {userIsPro ? <Download className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
                     {t.common.export}
                   </Button>
                   <Button variant="ghost" size="sm" className="gap-1 text-primary" asChild>

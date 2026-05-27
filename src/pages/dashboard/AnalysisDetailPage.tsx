@@ -62,6 +62,10 @@ export default function AnalysisDetailPage() {
 
   const runExport = async (kind: "pdf" | "pptx") => {
     if (!analysis || !id) return;
+    if (!userIsPro) {
+      setShowUpgrade(true);
+      return;
+    }
     setExporting(kind);
     try {
       if (kind === "pdf") await downloadPdf(id, language, false);
