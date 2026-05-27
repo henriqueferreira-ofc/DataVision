@@ -8,8 +8,10 @@ const corsHeaders = {
 };
 
 const PRO_PRICES = {
-  monthly: "price_1TbJ2SJWceWgSe2V7bUqtV35",
-  yearly: "price_1TbJ2uJWceWgSe2VVM0dKM9S",
+  // Use the well-branded "DataVision - Plano Mensal Pro" / "DataVision - Plano Anual Pro"
+  // products (with logo and full feature description) instead of the older bare products.
+  monthly: "price_1TabzsJWceWgSe2VPy9Dynzw",
+  yearly: "price_1TabuHJWceWgSe2VAbaToo6j",
 } as const;
 
 serve(async (req) => {
