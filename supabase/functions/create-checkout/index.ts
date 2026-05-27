@@ -21,7 +21,7 @@ serve(async (req) => {
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY not set");
 
-    const { billingCycle = "monthly", returnPath = "/" } = await req.json().catch(() => ({}));
+    const { billingCycle = "monthly", returnPath = "/", appBasePath = "/" } = await req.json().catch(() => ({}));
     if (billingCycle !== "monthly" && billingCycle !== "yearly") {
       return new Response(JSON.stringify({ error: "Invalid billing cycle" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -59,6 +59,13 @@ serve(async (req) => {
       typeof returnPath === "string" && returnPath.startsWith("/") && !returnPath.startsWith("//")
         ? returnPath
         : "/";
+    const safeBasePath =
+      typeof appBasePath === "string" && appBasePath.startsWith("/") && !appBasePath.startsWith("//")
+        ? appBasePath
+        : "/";
+    const normalizedBasePath = safeBasePath.endsWith("/") ? safeBasePath : `${safeBasePath}/`;
+    const checkoutSuccessPath =
+      normalizedBasePath === "/" ? "/signup" : `${normalizedBasePath}signup`;
 
     // Only allow http(s) origins to prevent open-redirect; fallback to this project's published URL
     const DEFAULT_ORIGIN = Deno.env.get("APP_ORIGIN") || "https://datavision.lovable.app";
@@ -67,7 +74,7 @@ serve(async (req) => {
     const origin = isValidOrigin ? requestOrigin : DEFAULT_ORIGIN;
     const cancelUrl = new URL(safeReturnPath, origin);
     cancelUrl.searchParams.set("checkout", "cancel");
-    const successUrl = new URL("/signup", origin);
+    const successUrl = new URL(checkoutSuccessPath, origin);
     successUrl.searchParams.set("checkout", "success");
     successUrl.searchParams.set("plan", "pro");
 
