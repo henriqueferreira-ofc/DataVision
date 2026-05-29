@@ -25,23 +25,13 @@ export function UpgradeModal({ open, onOpenChange, feature }: UpgradeModalProps)
   const handleCheckout = async () => {
     const billing = yearly ? "yearly" : "monthly";
     setLoading(`pro-${billing}`);
-    // Open the tab synchronously inside the click handler so mobile Safari
-    // doesn't block it as a popup once the await resolves.
-    const checkoutWindow = window.open("about:blank", "_blank");
     try {
       const url = await getProCheckoutUrl(billing);
-      if (checkoutWindow && !checkoutWindow.closed) {
-        checkoutWindow.location.href = url;
-      } else {
-        // Popup was blocked — fall back to same-tab navigation so the user
-        // still reaches Stripe Checkout.
-        window.location.href = url;
-      }
+      // Navigate in the same tab so Stripe's back button returns to this page.
+      window.location.href = url;
     } catch (err) {
       console.error("Checkout error:", err);
-      if (checkoutWindow && !checkoutWindow.closed) checkoutWindow.close();
       toast({ variant: "destructive", title: "Erro", description: pt ? "Não foi possível iniciar o checkout. Tente novamente." : "Could not start checkout. Please try again." });
-    } finally {
       setLoading(null);
     }
   };
